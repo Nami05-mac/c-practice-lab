@@ -1,0 +1,2902 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>C Practice Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<style>
+/* Layout: a game-like home (hero, stats, topic cards), then a split workspace per question: task and help on the left, editor on the right.
+   Palette: warm paper neutrals, one clay accent, five soft topic tints. Type: Newsreader titles, DM Sans UI, JetBrains Mono code. */
+:root {
+  --bg: #faf9f5; --surface: #ffffff; --sunken: #f3f1ea; --line: #e5e2d8; --line-strong: #cfcbbd;
+  --fg: #1f1e1d; --muted: #6b675e; --accent: #c4613f; --accent-ink: #ffffff; --accent-soft: #f7e6de;
+  --ok: #2f7a45; --ok-soft: #e4f0e5; --warn: #946509; --warn-soft: #f6ecd0; --bad: #b0412f; --bad-soft: #f8e3de;
+  --plum: #76508a; --plum-soft: #eee5f2;
+  --tn1: #f7e6de; --ti1: #a8452a; --tn2: #e9eed8; --ti2: #586b1f; --tn3: #e0ecf2; --ti3: #2d6585; --tn4: #eee5f2; --ti4: #76508a; --tn5: #f3ead3; --ti5: #8a6410;
+  --term: #262624; --term-fg: #eceae2; --term-dim: #a39f93;
+  --shadow: 0 1px 2px rgba(31,30,29,.05), 0 6px 18px -8px rgba(31,30,29,.14);
+  --t-kw: #a8452a; --t-str: #2c7447; --t-num: #8a5a00; --t-cm: #8a857a; --t-pre: #76508a; --t-fmt: #0b6a95;
+  --font-ui: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #262624; --surface: #30302e; --sunken: #1f1e1d; --line: #403e3a; --line-strong: #57544d;
+  --fg: #eceae2; --muted: #a39f93; --accent: #d97757; --accent-ink: #1f1e1d; --accent-soft: #4a3228;
+  --ok: #86c694; --ok-soft: #2a3a2e; --warn: #e2b660; --warn-soft: #3f3519; --bad: #e88d7f; --bad-soft: #4a2b26;
+  --plum: #cba7dc; --plum-soft: #3b2c45;
+  --tn1: #4a3228; --ti1: #eda085; --tn2: #353b24; --ti2: #b7cb7c; --tn3: #243844; --ti3: #8cc4e2; --tn4: #3b2c45; --ti4: #cba7dc; --tn5: #433818; --ti5: #e8c36f;
+  --term: #1a1918; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 22px -10px rgba(0,0,0,.5);
+  --t-kw: #e68f6f; --t-str: #8fcb9b; --t-num: #e3b863; --t-cm: #8d897e; --t-pre: #cba7dc; --t-fmt: #7cc4e8;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #262624; --surface: #30302e; --sunken: #1f1e1d; --line: #403e3a; --line-strong: #57544d;
+  --fg: #eceae2; --muted: #a39f93; --accent: #d97757; --accent-ink: #1f1e1d; --accent-soft: #4a3228;
+  --ok: #86c694; --ok-soft: #2a3a2e; --warn: #e2b660; --warn-soft: #3f3519; --bad: #e88d7f; --bad-soft: #4a2b26;
+  --plum: #cba7dc; --plum-soft: #3b2c45;
+  --tn1: #4a3228; --ti1: #eda085; --tn2: #353b24; --ti2: #b7cb7c; --tn3: #243844; --ti3: #8cc4e2; --tn4: #3b2c45; --ti4: #cba7dc; --tn5: #433818; --ti5: #e8c36f;
+  --term: #1a1918; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 22px -10px rgba(0,0,0,.5);
+  --t-kw: #e68f6f; --t-str: #8fcb9b; --t-num: #e3b863; --t-cm: #8d897e; --t-pre: #cba7dc; --t-fmt: #7cc4e8;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.55;
+  padding-block: 20px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, textarea, input { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--sunken); border: 1px solid var(--line); padding: 0.05em 0.35em; border-radius: 5px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+svg { display: block; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+
+/* top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 26px; }
+.brand { font-family: var(--font-display); font-size: 23px; font-weight: 500; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.brand .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); font-family: var(--font-mono); font-weight: 700; font-size: 17px; display: grid; place-items: center; }
+.stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.stat { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 13px 5px 10px; font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat svg { width: 16px; height: 16px; }
+.stat small { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+.stat.fire svg { color: var(--accent); } .stat.xp svg { color: var(--ti5); } .stat.rank svg { color: var(--ti4); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 7px 18px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 14px; transition: transform .12s ease, background .12s ease; }
+.btn:hover { background: var(--sunken); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 0 rgba(0,0,0,.14); }
+.btn.primary:hover { filter: brightness(1.07); background: var(--accent); }
+.btn.sm { min-height: 32px; padding: 3px 12px; font-size: 13px; border-radius: 8px; }
+.btn svg { width: 16px; height: 16px; }
+.ghost { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 12.5px; font-weight: 500; }
+.ghost:hover { color: var(--fg); background: var(--sunken); }
+.link { color: var(--muted); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; cursor: pointer; }
+.link:hover { color: var(--fg); }
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.015em; text-wrap: balance; margin: 0; }
+.eyebrow { font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.lede { color: var(--muted); max-width: 56ch; margin: 0; font-size: 16.5px; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: center; background: var(--accent-soft); border-radius: 24px; padding: 38px 40px; margin-bottom: 38px; position: relative; overflow: hidden; }
+.hero h1 { font-size: clamp(34px, 5.2vw, 54px); line-height: 1.04; margin: 10px 0 14px; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero .acts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+.hero .ringline { display: flex; align-items: center; gap: 14px; margin-top: 24px; color: var(--muted); font-size: 14px; }
+.hero .ringline strong { color: var(--fg); font-weight: 600; }
+.term { background: var(--term); color: var(--term-fg); border-radius: 16px; box-shadow: var(--shadow); font-family: var(--font-mono); font-size: 13.5px; line-height: 1.7; transform: rotate(1.2deg); min-width: 0; overflow: hidden; }
+.dots { display: flex; gap: 6px; padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: #55524b; display: block; }
+.dots i:nth-child(1) { background: #d96a55; } .dots i:nth-child(2) { background: #dcb257; } .dots i:nth-child(3) { background: #78b27f; }
+.term pre { margin: 0; padding: 14px 18px 18px; overflow-x: auto; white-space: pre; }
+.term .p { color: var(--term-dim); } .term .o { color: #8fcb9b; }
+.cursor { display: inline-block; width: 8px; height: 15px; background: var(--term-fg); vertical-align: -2px; animation: blink 1.1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* topic cards */
+.sect-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.sect-head h2 { font-size: 26px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 16px; }
+.tcard { display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); transition: transform .15s ease, border-color .15s ease; min-width: 0; }
+.tcard:hover { transform: translateY(-3px); border-color: var(--line-strong); }
+.tcard .top2 { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.glyph { min-width: 54px; height: 54px; padding: 0 12px; border-radius: 14px; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: 17px; }
+.tcard h3 { font-size: 21px; line-height: 1.2; }
+.tcard p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.minidots { display: flex; gap: 4px; flex-wrap: wrap; }
+.minidots i { width: 9px; height: 9px; border-radius: 3px; background: var(--sunken); border: 1px solid var(--line-strong); display: block; }
+.minidots i.on { background: var(--ok); border-color: var(--ok); }
+.tcard .foot { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); margin-top: auto; }
+.tcard .foot b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.go { color: var(--accent); font-weight: 600; display: inline-flex; gap: 4px; align-items: center; }
+.go svg { width: 14px; height: 14px; }
+.t1 { background: var(--tn1); color: var(--ti1); } .t2 { background: var(--tn2); color: var(--ti2); } .t3 { background: var(--tn3); color: var(--ti3); } .t4 { background: var(--tn4); color: var(--ti4); } .t5 { background: var(--tn5); color: var(--ti5); }
+
+/* topic page */
+.crumb { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+.crumb a { display: inline-flex; gap: 6px; align-items: center; font-weight: 500; }
+.crumb a:hover { color: var(--fg); }
+.crumb svg { width: 15px; height: 15px; }
+.thead { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 20px; align-items: center; margin-bottom: 22px; }
+.thead .glyph { min-width: 76px; height: 76px; font-size: 24px; border-radius: 20px; }
+.thead h1 { font-size: clamp(30px, 4.4vw, 42px); line-height: 1.1; }
+.recapcard { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 28px; margin-bottom: 22px; }
+.recapcard h3 { grid-column: 1 / -1; font-family: var(--font-ui); font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.recapcard p { margin: 0; font-size: 14.5px; padding-left: 14px; border-left: 3px solid var(--accent-soft); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 16px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chips .k { font-size: 12.5px; color: var(--muted); margin-right: 2px; }
+.chip { border: 1px solid var(--line-strong); background: none; border-radius: 999px; padding: 4px 13px; font-size: 13px; cursor: pointer; color: var(--muted); font-weight: 500; }
+.chip:hover { color: var(--fg); background: var(--sunken); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.qgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.qtile { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 14px; align-items: center; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); transition: transform .15s ease, border-color .15s ease; }
+.qtile:hover { transform: translateY(-2px); border-color: var(--line-strong); }
+.qtile .num { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: 14px; background: var(--sunken); color: var(--muted); }
+.qtile.isdone .num { background: var(--ok); color: var(--accent-ink); }
+.qtile .num svg { width: 18px; height: 18px; }
+.qtile .t { font-weight: 600; overflow-wrap: anywhere; line-height: 1.3; display: block; }
+.qtile .m { display: flex; gap: 8px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+.kind { font-size: 12.5px; color: var(--muted); }
+.pill { font-size: 12px; font-weight: 600; padding: 1px 9px; border-radius: 999px; white-space: nowrap; }
+.lv-easy { color: var(--ok); background: var(--ok-soft); }
+.lv-medium { color: var(--warn); background: var(--warn-soft); }
+.lv-challenge { color: var(--plum); background: var(--plum-soft); }
+.empty { padding: 30px 16px; text-align: center; color: var(--muted); border: 1px dashed var(--line-strong); border-radius: 14px; }
+
+/* question page */
+.qbar { display: flex; align-items: center; gap: 16px; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; }
+.qbar .back { display: inline-flex; gap: 6px; align-items: center; font-weight: 500; color: var(--muted); font-size: 14px; }
+.qbar .back:hover { color: var(--fg); }
+.qbar .back svg { width: 15px; height: 15px; }
+.trail { display: flex; gap: 5px; flex: 1; justify-content: center; min-width: 120px; flex-wrap: wrap; }
+.trail a { width: 22px; height: 8px; border-radius: 99px; background: var(--line-strong); display: block; }
+.trail a.on { background: var(--ok); } .trail a.cur { background: var(--accent); width: 34px; }
+.qnav { display: flex; gap: 6px; align-items: center; }
+.qnav .btn { min-width: 40px; padding: 4px 10px; }
+.qnav span { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
+.qgrid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "task work" "help work"; grid-template-rows: min-content 1fr; gap: 28px 36px; align-items: start; }
+.pane-task { grid-area: task; } .pane-help { grid-area: help; } .pane-work { grid-area: work; position: sticky; top: 20px; display: flex; flex-direction: column; gap: 14px; }
+.pane-task, .pane-help { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pane-work { min-width: 0; }
+.qtitle { display: flex; flex-direction: column; gap: 10px; }
+.qtitle h1 { font-size: clamp(28px, 3.6vw, 38px); line-height: 1.12; }
+.pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.task { font-size: 17px; line-height: 1.6; margin: 0; max-width: 62ch; }
+.note { color: var(--muted); font-size: 13.5px; margin: 0; }
+details.recap { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+details.recap summary { cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 13.5px; list-style: none; display: flex; justify-content: space-between; align-items: center; color: var(--muted); }
+details.recap summary::-webkit-details-marker { display: none; }
+details.recap summary::after { content: "+"; font-size: 18px; line-height: 1; }
+details.recap[open] summary::after { content: "–"; }
+details.recap ul { margin: 0; padding: 0 14px 14px 32px; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; }
+.io { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.box { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); min-width: 0; overflow: hidden; }
+.box .lab { font-size: 11.5px; color: var(--muted); padding: 6px 12px; border-bottom: 1px solid var(--line); background: var(--sunken); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.box pre { margin: 0; padding: 10px 12px; font-family: var(--font-mono); font-size: 13.5px; line-height: 1.55; overflow-x: auto; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.code { border: 1px solid var(--line); border-radius: 12px; background: var(--sunken); min-width: 0; overflow: hidden; }
+.code-bar { display: flex; justify-content: space-between; align-items: center; padding: 3px 8px 3px 14px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); min-height: 34px; font-family: var(--font-mono); }
+.code pre { margin: 0; padding: 12px 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 13.5px; line-height: 1.6; tab-size: 4; }
+.code code { background: none; border: 0; padding: 0; font-size: inherit; }
+.t-kw { color: var(--t-kw); font-weight: 500; } .t-str { color: var(--t-str); } .t-num { color: var(--t-num); }
+.t-cm { color: var(--t-cm); font-style: italic; } .t-pre { color: var(--t-pre); } .t-fmt { color: var(--t-fmt); }
+
+.win { --e-bg: #1f1e1d; --e-fg: #eceae2; --e-dim: #a39f93; --e-line: #2f2e2b; --e-hover: rgba(255,255,255,.08); --e-caret: #d97757; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--e-bg); color: var(--e-fg); overflow: hidden; box-shadow: var(--shadow); }
+.win:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow); }
+.win .bar { display: flex; align-items: center; gap: 12px; padding: 0 8px 0 0; border-bottom: 1px solid var(--e-line); }
+.win .bar .dots { border: 0; }
+.win .bar .fname { font-family: var(--font-mono); font-size: 12.5px; color: var(--e-dim); flex: 1; }
+.win .bar .ghost { color: var(--e-dim); } .win .bar .ghost:hover { color: var(--e-fg); background: var(--e-hover); }
+.ed { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.edwrap { position: relative; min-width: 0; }
+.mono { font-family: var(--font-mono); font-size: var(--e-fs, 13.5px); line-height: 1.6; tab-size: 4; white-space: pre; font-variant-ligatures: none; letter-spacing: 0; }
+.gut { margin: 0; padding: 14px 10px 14px 14px; color: var(--e-gutc, #77736a); text-align: right; user-select: none; overflow: hidden; border-right: 1px solid var(--e-line); }
+.hlp { position: absolute; inset: 0; margin: 0; padding: 14px 14px 40px; overflow: hidden; pointer-events: none; color: var(--e-fg); }
+.hlp.static { position: static; overflow: auto; padding-bottom: 14px; }
+textarea.src { display: block; position: relative; z-index: 1; width: 100%; border: 0; background: transparent; color: transparent; -webkit-text-fill-color: transparent; padding: 14px; resize: vertical; min-height: 300px; overflow: auto; outline: none; caret-color: var(--e-caret); }
+textarea.src::selection { background: rgba(120,150,220,.35); -webkit-text-fill-color: transparent; }
+.e-kw { color: var(--e-kw); font-weight: 500; } .e-ty { color: var(--e-ty); } .e-fn { color: var(--e-fn); } .e-id { color: var(--e-id); }
+.e-str { color: var(--e-str); } .e-fmt { color: var(--e-fmt); } .e-num { color: var(--e-num); } .e-pre { color: var(--e-pre); }
+.e-cm { color: var(--e-cm); font-style: italic; } .e-op { color: var(--e-op); } .e-pn { color: var(--e-pn); }
+/* colours page */
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 0 0 22px; }
+.preset { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 14px; padding: 10px; cursor: pointer; text-align: left; font: inherit; color: var(--fg); display: flex; flex-direction: column; gap: 8px; }
+.preset:hover { border-color: var(--accent); }
+.preset[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.preset .sw { display: flex; align-items: center; gap: 5px; border-radius: 8px; padding: 9px 10px; }
+.preset .sw i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.preset b { font-size: 13.5px; font-weight: 600; }
+.tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.pick { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 9px 12px; }
+.pick input[type=color] { width: 36px; height: 36px; padding: 0; border: 1px solid var(--line-strong); border-radius: 10px; background: none; cursor: pointer; flex: none; }
+.pick span { display: flex; flex-direction: column; font-size: 14px; font-weight: 500; line-height: 1.25; min-width: 0; }
+.pick small { color: var(--muted); font-family: var(--font-mono); font-size: 12px; font-weight: 400; }
+.themelayout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+@media (min-width: 980px) { .themelayout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; } .themelayout .stick { position: sticky; top: 16px; } }
+.checkbox { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.checkbox h3 { font-size: 19px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+textarea.plain { width: 100%; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg); padding: 10px 12px; font-family: var(--font-mono); font-size: 13.5px; line-height: 1.55; resize: vertical; min-height: 88px; white-space: pre; overflow: auto; }
+textarea.plain:focus, input.ans:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+input.ans { flex: 1 1 200px; min-width: 0; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--bg); padding: 8px 14px; font-family: var(--font-mono); font-size: 15px; min-height: 44px; }
+.row-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.result { border: 1px solid var(--line-strong); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; animation: pop .25s ease; }
+.result.ok { background: var(--ok-soft); border-color: var(--ok); }
+.result.bad { background: var(--bad-soft); border-color: var(--bad); }
+.result strong { font-weight: 700; }
+.result .d { font-family: var(--font-mono); font-size: 13px; overflow-wrap: anywhere; }
+@keyframes pop { from { transform: scale(.98); opacity: .4; } to { transform: none; opacity: 1; } }
+.donebtn[aria-pressed="true"] { background: var(--ok-soft); border-color: var(--ok); }
+.stat.sync svg { color: var(--ok); } .stat.sync.local svg { color: var(--muted); }
+
+.hint { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--tn5); }
+.hint .ic { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); color: var(--ti5); display: grid; place-items: center; }
+.hint .ic svg { width: 15px; height: 15px; }
+.hint p { margin: 3px 0 0; }
+.steps { display: flex; flex-direction: column; gap: 16px; }
+.step { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; }
+.step .no { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 12.5px; font-weight: 700; display: grid; place-items: center; margin-top: 2px; }
+.step .body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.step p { margin: 0; max-width: 60ch; }
+.step .code { background: var(--accent-soft); border-color: transparent; }
+.answer-line { font-family: var(--font-mono); font-size: 15px; padding: 8px 14px; border-radius: 10px; background: var(--ok-soft); border: 1px solid var(--ok); display: inline-block; align-self: flex-start; white-space: pre-wrap; font-weight: 500; }
+.whylist { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 60ch; }
+.helpbox { border: 1px dashed var(--line-strong); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.helpbox h2 { font-size: 22px; }
+
+/* run and terminal */
+.runbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.runbar .run { min-width: 110px; }
+.runbar .note kbd { font-family: var(--font-mono); font-size: 11.5px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: var(--surface); }
+.termwin { border-radius: 16px; background: var(--term); color: var(--term-fg); border: 1px solid var(--line-strong); overflow: hidden; box-shadow: var(--shadow); }
+.termwin .bar { display: flex; align-items: center; gap: 12px; padding-right: 8px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.termwin .bar .dots { border: 0; }
+.termwin .bar .fname { font-family: var(--font-mono); font-size: 12.5px; color: var(--term-dim); flex: 1; }
+.termwin .bar .ghost { color: var(--term-dim); } .termwin .bar .ghost:hover { color: var(--term-fg); background: rgba(255,255,255,.08); }
+.tbody { padding: 14px; min-height: 120px; max-height: 380px; overflow: auto; font-family: var(--font-mono); font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.tbody .dim { color: var(--term-dim); } .tbody .typed { color: #8fcb9b; }
+.tbody .d-err { color: #f2a393; } .tbody .d-warn { color: #e8c36f; } .tbody .tip { color: #9fc6e6; }
+.tbody .src { color: var(--term-dim); }
+.tin { background: transparent; border: 0; border-bottom: 1px dashed var(--term-dim); color: #8fcb9b; font: inherit; width: 22ch; max-width: 100%; padding: 0; outline: none; caret-color: var(--accent); }
+.tin:focus { border-bottom-color: var(--accent); }
+.result.info { background: var(--sunken); }
+
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.has::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.notebox { display: flex; flex-direction: column; gap: 8px; background: var(--tn5); border-radius: 14px; padding: 14px; }
+.notebox textarea.plain { min-height: 110px; background: var(--surface); font-family: var(--font-ui); white-space: pre-wrap; }
+
+/* celebration */
+.toast { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; z-index: 20; }
+.toast .in { pointer-events: auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; background: var(--fg); color: var(--bg); border-radius: 16px; padding: 12px 14px 12px 18px; box-shadow: 0 12px 34px -10px rgba(0,0,0,.45); animation: rise .35s cubic-bezier(.2,.9,.3,1.2); max-width: 100%; }
+.toast b { font-size: 16px; } .toast .xp { color: #f0b86a; font-weight: 700; margin-left: 8px; }
+.toast .btn { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); min-height: 36px; }
+.toast .ghost { color: inherit; }
+@keyframes rise { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 19; }
+.confetti i { position: absolute; bottom: 12%; left: 50%; width: 9px; height: 14px; border-radius: 2px; opacity: 0; animation: burst 1.3s cubic-bezier(.15,.7,.3,1) forwards; }
+@keyframes burst { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; } }
+
+.foot-note { margin-top: 44px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 960px) {
+  .hero { grid-template-columns: minmax(0, 1fr); padding: 28px 22px; border-radius: 20px; }
+  .term { transform: none; }
+  .qgrid2 { grid-template-columns: minmax(0, 1fr); grid-template-areas: "task" "work" "help"; grid-template-rows: none; gap: 24px; }
+  .pane-work { position: static; }
+}
+@media (max-width: 560px) {
+  body { padding-block: 14px 64px; }
+  .thead { grid-template-columns: auto minmax(0, 1fr); }
+  .thead .ringwrap { display: none; }
+  .qgrid { grid-template-columns: minmax(0, 1fr); }
+  .trail { order: 3; flex-basis: 100%; justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { .cursor, .result, .toast .in { animation: none; } .confetti { display: none; } .tcard, .qtile, .btn { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#home" aria-label="C Practice Lab, home"><span class="logo">C</span>Practice Lab</a>
+    <div class="stats" id="stats"></div>
+  </header>
+  <main id="main"></main>
+</div>
+<div id="fx" aria-live="polite"></div>
+
+<script>
+// Question bank for the C practice app. Every code solution and predict snippet is compiled and checked by test.js.
+const r = String.raw;
+const st = (lines, say) => ({ code: lines.join("\n"), say });
+const HEAD = ["#include <stdio.h>", "", "int main() {"];
+const TAIL = ["", "    return 0;", "}"];
+const HEAD_SAY = "Every C program starts like this. `stdio.h` gives us `printf` and `scanf`, and `main` is the place where the program begins running.";
+const TAIL_SAY = "`return 0;` tells the system the program finished without problems. The closing brace ends `main`.";
+
+const TOPICS = [
+  { id: "vc", name: "Variables & Constants", recap: [
+    "A variable is a named place in memory. Its type decides what it can hold: `int` whole numbers, `float` and `double` decimals, `char` one character.",
+    "printf placeholders: `%d` int, `%f` float, `%c` char, `%.2f` a decimal with 2 digits after the point.",
+    "A variable name can use letters, digits and `_`. It cannot start with a digit, cannot contain spaces or `-`, and cannot be a keyword. Names are case-sensitive.",
+    "A constant never changes after it is set: `const float PI = 3.14;` or `#define PI 3.14`."
+  ]},
+  { id: "kw", name: "Keywords", recap: [
+    "Keywords are words C has already reserved, such as `int`, `float`, `char`, `if`, `else`, `while`, `return`, `const`, `sizeof`.",
+    "You cannot use a keyword as a variable name.",
+    "`main` and `printf` are not keywords. They are just names of functions."
+  ]},
+  { id: "cp", name: "Compilation", recap: [
+    "Your `.c` file goes through the preprocessor (handles `#include` and `#define`), then the compiler (checks syntax, makes object code), then the linker (joins in library code such as `printf`). The result is the executable.",
+    "A syntax error, like a missing `;`, is reported by the compiler.",
+    "The compiler stops at the first serious problem, so fix errors from the top of the list down."
+  ]},
+  { id: "in", name: "Instructions", recap: [
+    "There are three kinds of instruction: type declaration (`int a;`), arithmetic (`a = b + c;`) and control (decides which statement runs next).",
+    "In an arithmetic instruction the left side of `=` must be a single variable. `a + b = c;` is wrong.",
+    "Every instruction ends with a semicolon."
+  ]},
+  { id: "ar", name: "Arithmetic & Modulo", recap: [
+    "Operators: `+  -  *  /  %`. Integer division throws the fraction away: `7 / 2` is `3`.",
+    "`%` gives the remainder and works only on integers: `17 % 5` is `2`.",
+    "Digit tricks: `n % 10` is the last digit, `n / 10` removes the last digit.",
+    "In C99 and later, the sign of `%` follows the left number: `-7 % 3` is `-1`."
+  ]},
+  { id: "tc", name: "Type Conversion", recap: [
+    "In a mixed expression the smaller type is promoted: `int` with `float` gives `float`.",
+    "`int / int` is always integer division, even if you store the answer in a `float`.",
+    "Storing a `float` in an `int` cuts off the decimals: `5.99` becomes `5`.",
+    "Casting forces a conversion: `(float)a / b`. A `char` is stored as a number, so `'A'` is `65`."
+  ]},
+  { id: "op", name: "Operator Precedence", recap: [
+    "Highest to lowest: `( )`, then unary `! -`, then `* / %`, then `+ -`, then `< <= > >=`, then `== !=`, then `&&`, then `||`, then `= += -=`.",
+    "Operators on the same level go left to right. Assignment goes right to left.",
+    "When in doubt, add brackets. They make code easier to read as well."
+  ]},
+  { id: "rl", name: "Relational Operators", recap: [
+    "`<  >  <=  >=  ==  !=` give `1` for true and `0` for false.",
+    "`==` compares. `=` assigns. Mixing them up is one of the most common beginner bugs.",
+    "In C, 0 is false and every non-zero value is true.",
+    "`3 < 5 < 2` is read left to right as `(3 < 5) < 2`, so `1 < 2`, which is `1`."
+  ]},
+  { id: "lg", name: "Logical Operators", recap: [
+    "`&&` (AND) is true only when both sides are true. `||` (OR) is true when at least one side is true. `!` (NOT) flips true and false.",
+    "Short-circuit: in `a && b`, if `a` is 0 then `b` is never evaluated. In `a || b`, if `a` is non-zero then `b` is never evaluated.",
+    "`!5` is `0`, because 5 counts as true and NOT flips it.",
+    "Use `&&` for ranges: `n >= 10 && n <= 20`."
+  ]},
+  { id: "as", name: "Assignment Operators", recap: [
+    "`=` stores the right side in the left variable.",
+    "Shorthand: `a += 5` means `a = a + 5`. The same goes for `-=  *=  /=  %=`.",
+    "Assignment goes right to left, so `a = b = c = 4` sets all three to 4.",
+    "An assignment is also an expression, and its value is the value that was stored."
+  ]},
+  { id: "ct", name: "Control Preview", recap: [
+    "`if (condition) { ... } else { ... }` runs one block depending on whether the condition is non-zero.",
+    "Join conditions with `&&` and `||`, and use `else if` to test several ranges in order.",
+    "These questions use what you learned about relational and logical operators."
+  ]}
+];
+
+const QUESTIONS = [
+// ---------- Variables & Constants ----------
+{ topic: "vc", level: "easy", kind: "code", title: "Your first variables",
+  task: "Declare an `int` named `age` (19), a `float` named `height` (5.8) and a `char` named `grade` ('A'). Print each one on its own line. Show the height with 1 digit after the decimal point.",
+  output: "Age: 19\nHeight: 5.8\nGrade: A",
+  hints: [
+    "Each type has its own printf placeholder: `%d` for int, `%f` for float, `%c` for char.",
+    "To print only 1 digit after the point, write `%.1f` instead of `%f`.",
+    "Use one printf per line and end each with `\\n`. Example: `printf(\"Age: %d\\n\", age);`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int age = 19;", "    float height = 5.8;", "    char grade = 'A';"], "Three variables, each with a type and a starting value. `char` values go in single quotes."),
+    st(["", r`    printf("Age: %d\n", age);`], "`%d` is replaced by the value of `age`. `\\n` moves to a new line."),
+    st([r`    printf("Height: %.1f\n", height);`, r`    printf("Grade: %c\n", grade);`], "`%.1f` prints the float with one digit after the point. `%c` prints a single character."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "vc", level: "easy", kind: "code", title: "Swap with a third variable",
+  task: "Two variables hold `a = 10` and `b = 20`. Swap their values using a third variable named `temp`. Print the values before and after the swap.",
+  output: "Before: a=10 b=20\nAfter: a=20 b=10",
+  hints: [
+    "Think of two glasses of water. To swap them you need an empty third glass.",
+    "The order matters. First save `a` in `temp`, then overwrite `a`, then finish with `b`.",
+    "`temp = a;` then `a = b;` then `b = temp;`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a = 10, b = 20, temp;", r`    printf("Before: a=%d b=%d\n", a, b);`], "We declare three ints in one line. `temp` has no value yet and that is fine, because we fill it before we read it."),
+    st(["", "    temp = a;"], "Step 1: save the value of `a` (10) in `temp`, so it is not lost."),
+    st(["    a = b;"], "Step 2: now `a` can be overwritten with the value of `b` (20)."),
+    st(["    b = temp;"], "Step 3: `b` gets the old value of `a` from `temp` (10). The swap is done."),
+    st([r`    printf("After: a=%d b=%d\n", a, b);`], "Print again to show the new values."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "vc", level: "easy", kind: "code", title: "Area of a circle with a constant",
+  task: "Use a constant `PI` (3.14159) and a radius of 7 to print the area of a circle, rounded to 2 decimal places. `PI` must not be changeable.",
+  output: "Area = 153.94",
+  hints: [
+    "A constant is declared by putting the keyword `const` in front of the type.",
+    "Area = PI x r x r. Store the result in a `float`.",
+    "`const float PI = 3.14159;` `int r = 7;` `float area = PI * r * r;` then print with `%.2f`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    const float PI = 3.14159;", "    int r = 7;"], "`const` locks the value of `PI`. If you later write `PI = 3;` the compiler gives an error."),
+    st(["    float area = PI * r * r;"], "`PI` is a float and `r` is an int, so C turns `r` into a float before multiplying. The answer is a float."),
+    st([r`    printf("Area = %.2f\n", area);`], "`%.2f` rounds the answer to 2 decimal places: 153.93791 becomes 153.94."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "vc", level: "easy", kind: "code", title: "How big is each data type?",
+  task: "Print the size in bytes of `int`, `float`, `char` and `double` using the `sizeof` operator.",
+  output: "int: 4\nfloat: 4\nchar: 1\ndouble: 8",
+  ignoreNumbers: true,
+  note: "The sizes can differ on some computers. If your numbers are different but the labels match, that is fine.",
+  hints: [
+    "`sizeof(int)` gives the number of bytes an int uses.",
+    "The result is not a plain `int`, so the usual placeholder for it is `%zu` (or `%lu` on older compilers).",
+    r`printf("int: %zu\n", sizeof(int));`
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st([r`    printf("int: %zu\n", sizeof(int));`], "`sizeof` asks C how many bytes a type uses. `%zu` is the placeholder for that result."),
+    st([r`    printf("float: %zu\n", sizeof(float));`, r`    printf("char: %zu\n", sizeof(char));`, r`    printf("double: %zu\n", sizeof(double));`], "The same idea for the other three types. `char` is always 1 byte."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "vc", level: "easy", kind: "predict", title: "How many names are invalid?",
+  prompt: "Look at these six variable names: `2total`, `total_2`, `my-var`, `_count`, `float`, `Total`. How many of them are NOT valid in C?",
+  answer: "3",
+  hints: [
+    "Check three rules: it must not start with a digit, it can only contain letters, digits and `_`, and it must not be a keyword.",
+    "`Total` and `total_2` are fine. Check the other four one by one."
+  ],
+  why: [
+    "`2total` is invalid because it starts with a digit.",
+    "`my-var` is invalid because `-` is not allowed in a name. C reads it as `my - var`.",
+    "`float` is invalid because it is a keyword.",
+    "`total_2`, `_count` and `Total` are all valid. That makes 3 invalid names."
+  ]},
+
+// ---------- Keywords ----------
+{ topic: "kw", level: "easy", kind: "predict", title: "Spot the keywords",
+  prompt: "How many keywords does this program contain?",
+  full: [
+    "#include <stdio.h>",
+    "int main() {",
+    "    float price = 2.5;",
+    "    const int qty = 4;",
+    "    printf(\"%f\\n\", price * qty);",
+    "    return 0;",
+    "}"
+  ].join("\n"),
+  answer: "5",
+  hints: [
+    "`main` and `printf` are names of functions, not keywords.",
+    "Look for type names and words that control the program: `int`, `float`, `const`, `return`..."
+  ],
+  why: [
+    "`int` in `int main()` is a keyword (1).",
+    "`float` is a keyword (2).",
+    "`const` is a keyword (3).",
+    "The second `int` in `const int qty` is a keyword (4).",
+    "`return` is a keyword (5). `main`, `printf`, `price` and `qty` are not keywords."
+  ]},
+{ topic: "kw", level: "easy", kind: "predict", title: "A keyword as a name",
+  prompt: "Will the line `int float = 3;` compile? Answer yes or no.",
+  answer: "no",
+  alt: ["n", "no it will not"],
+  hints: ["Is `float` a word that C has already reserved?"],
+  why: [
+    "`float` is a keyword, so C already uses it to mean the decimal type.",
+    "A keyword cannot be used as a variable name, so the compiler reports an error."
+  ]},
+
+// ---------- Compilation ----------
+{ topic: "cp", level: "easy", kind: "code", title: "Fix the compile errors",
+  task: "This program does not compile. Fix it so that it prints the total. Type your fixed version in the editor.",
+  starter: [
+    "#include <stdio.h>",
+    "",
+    "int main() {",
+    "    int a = 5",
+    "    int b = 10;",
+    "    printf(\"Total: %d\\n\", a + b)",
+    "    return 0;",
+    "}"
+  ].join("\n"),
+  output: "Total: 15",
+  hints: [
+    "The compiler error message names a line number. Read it carefully.",
+    "Look at the end of each instruction. What does every instruction in C need there?",
+    "Two lines are missing a semicolon: the declaration of `a` and the `printf` line."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a = 5;", "    int b = 10;"], "Error 1: `int a = 5` was missing its semicolon. Every instruction ends with `;`."),
+    st([r`    printf("Total: %d\n", a + b);`], "Error 2: the `printf` line was missing its semicolon too. The compiler usually reports the error on the line after the real mistake."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "cp", level: "easy", kind: "predict", title: "Which stage handles #include?",
+  prompt: "A C program is preprocessed, compiled and linked. At which of these stages is the line `#include <stdio.h>` handled?",
+  answer: "preprocessing",
+  alt: ["preprocessor", "the preprocessor", "preprocess", "preprocessing stage"],
+  hints: ["Lines that start with `#` are not real C instructions. Something runs before the compiler to deal with them."],
+  why: [
+    "Lines starting with `#` are directives for the preprocessor.",
+    "The preprocessor pastes the contents of `stdio.h` into your file before the compiler even starts.",
+    "The compiler then checks syntax, and the linker joins in the real code of `printf`."
+  ]},
+
+// ---------- Instructions ----------
+{ topic: "in", level: "easy", kind: "predict", title: "Name the instruction",
+  prompt: "Which type of instruction is `float y;`? (type declaration, arithmetic or control)",
+  answer: "type declaration",
+  alt: ["declaration", "declaration instruction", "type declaration instruction"],
+  hints: ["It only tells the compiler the name and type of a variable. Nothing is calculated."],
+  why: [
+    "It declares a variable named `y` of type `float`.",
+    "No calculation is done, and nothing decides which line runs next, so it is a type declaration instruction."
+  ]},
+{ topic: "in", level: "easy", kind: "code", title: "Three kinds in one program",
+  task: "Write a program with a type declaration instruction for `a = 12` and `b = 8`, then an arithmetic instruction that stores their sum in `sum`, then print the sum. Put a comment above each instruction naming its type.",
+  output: "Sum = 20",
+  hints: [
+    "A comment starts with `//` and C ignores it.",
+    "Declare `a`, `b` and `sum` first. Then calculate with `sum = a + b;`.",
+    "Use `// type declaration` and `// arithmetic` above the matching lines."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    // type declaration", "    int a = 12, b = 8, sum;"], "This line only creates variables and gives two of them values, so it is a type declaration instruction."),
+    st(["", "    // arithmetic", "    sum = a + b;"], "A calculation whose result goes into one variable on the left: an arithmetic instruction."),
+    st(["", r`    printf("Sum = %d\n", sum);`], "Printing the answer."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "in", level: "medium", kind: "predict", title: "Which line is invalid?",
+  prompt: "One of these arithmetic instructions is not valid in C. Which one? Answer A, B or C.\n\nA:  `a = b + c;`\nB:  `a + b = c;`\nC:  `a = b * 2 + c;`",
+  answer: "B",
+  hints: ["Look at the left side of the `=` sign. What is allowed there?"],
+  why: [
+    "In an arithmetic instruction, the left side of `=` must be a single variable, because that is where the answer is stored.",
+    "In B, the left side is `a + b`, which is a calculation and not a place to store anything. So B is invalid."
+  ]},
+
+// ---------- Arithmetic ----------
+{ topic: "ar", level: "easy", kind: "code", title: "Five operations",
+  task: "For `a = 17` and `b = 5`, print the sum, difference, product, quotient and remainder, each on its own line with a label.",
+  output: "Sum: 22\nDifference: 12\nProduct: 85\nQuotient: 3\nRemainder: 2",
+  hints: [
+    "The five operators are `+`, `-`, `*`, `/` and `%`.",
+    "You can calculate directly inside printf: `printf(\"Sum: %d\\n\", a + b);`",
+    "Both numbers are `int`, so `17 / 5` gives `3` and the fraction is dropped. `17 % 5` gives the remainder `2`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a = 17, b = 5;"], "Two integers to work with."),
+    st([r`    printf("Sum: %d\n", a + b);`, r`    printf("Difference: %d\n", a - b);`, r`    printf("Product: %d\n", a * b);`], "The expression is calculated first, and then its value replaces `%d`."),
+    st([r`    printf("Quotient: %d\n", a / b);`], "Both sides are `int`, so this is integer division. 17 / 5 is 3.4, and C keeps only the 3."),
+    st([r`    printf("Remainder: %d\n", a % b);`], "`%` gives what is left over. 5 goes into 17 three times (15), and 2 is left."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "easy", kind: "code", title: "Last digit and the rest",
+  task: "For `n = 4825`, print the last digit and the number that remains after removing the last digit.",
+  output: "Last digit: 5\nRemaining: 482",
+  hints: [
+    "Dividing by 10 moves every digit one place to the right.",
+    "The remainder after dividing by 10 is the last digit.",
+    "`n % 10` gives 5 and `n / 10` gives 482."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int n = 4825;"], "The number we want to split."),
+    st([r`    printf("Last digit: %d\n", n % 10);`], "`4825 % 10` is 5, because 10 goes into 4825 four hundred eighty-two times and leaves 5."),
+    st([r`    printf("Remaining: %d\n", n / 10);`], "Integer division by 10 throws the last digit away: 482.5 becomes 482."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "easy", kind: "code", title: "Minutes to hours and minutes",
+  task: "Convert `500` minutes to hours and minutes.",
+  output: "8 hours 20 minutes",
+  hints: [
+    "There are 60 minutes in an hour.",
+    "Whole hours come from division and what is left over comes from the remainder.",
+    "`total / 60` gives 8 and `total % 60` gives 20."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int total = 500;"], "The total number of minutes."),
+    st(["    int hours = total / 60;", "    int minutes = total % 60;"], "`500 / 60` is 8 (integer division), which is the number of complete hours. `500 % 60` is 20, the minutes left over."),
+    st(["", r`    printf("%d hours %d minutes\n", hours, minutes);`], "Two placeholders get the two values in order."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "medium", kind: "code", title: "Sum of digits",
+  task: "Find the sum of the digits of the 3-digit number `n = 347`, without using a loop.",
+  output: "Sum of digits = 14",
+  hints: [
+    "You already know how to get the last digit. Think about how to get the middle and the first digit too.",
+    "The last digit is `n % 10`. The first digit is `n / 100`. The middle digit is `n / 10 % 10`.",
+    "`int d1 = n % 10; int d2 = n / 10 % 10; int d3 = n / 100;` then add the three."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int n = 347;"], "The number to split into digits."),
+    st(["    int d1 = n % 10;"], "Last digit: 347 % 10 = 7."),
+    st(["    int d2 = n / 10 % 10;"], "`n / 10` is 34. Then `34 % 10` is 4. This is the middle digit. `/` and `%` have the same level and go left to right."),
+    st(["    int d3 = n / 100;"], "347 / 100 is 3 because the fraction is dropped. This is the first digit."),
+    st(["", r`    printf("Sum of digits = %d\n", d1 + d2 + d3);`], "7 + 4 + 3 = 14."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "medium", kind: "code", title: "Reverse a 3-digit number",
+  task: "Reverse the 3-digit number `n = 456` using only `/` and `%` and print the result.",
+  output: "Reversed: 654",
+  hints: [
+    "Pull out the three digits first, like in the sum of digits question.",
+    "The last digit should become the hundreds digit, so multiply it by 100.",
+    "`reversed = d1 * 100 + d2 * 10 + d3;` where `d1` is the last digit and `d3` is the first."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int n = 456;", "    int d1 = n % 10;       // 6", "    int d2 = n / 10 % 10;  // 5", "    int d3 = n / 100;      // 4"], "Split the number into its three digits. The comments show the values."),
+    st(["    int reversed = d1 * 100 + d2 * 10 + d3;"], "Rebuild the number with the digits in the opposite order: 6 x 100 + 5 x 10 + 4 = 654."),
+    st([r`    printf("Reversed: %d\n", reversed);`], "Print the answer."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "medium", kind: "code", title: "Swap without a third variable",
+  task: "Swap `a = 7` and `b = 3` without using a third variable. Use only arithmetic.",
+  output: "a = 3, b = 7",
+  hints: [
+    "Store the total of both numbers in one of the variables.",
+    "After `a = a + b;` you can get the old `a` back by subtracting `b`.",
+    "`a = a + b;` then `b = a - b;` then `a = a - b;`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a = 7, b = 3;"], "Starting values."),
+    st(["", "    a = a + b;   // a = 10"], "`a` now holds the sum of both numbers."),
+    st(["    b = a - b;   // b = 10 - 3 = 7"], "Sum minus the old `b` gives the old `a`. So `b` now holds 7."),
+    st(["    a = a - b;   // a = 10 - 7 = 3"], "Sum minus the new `b` (old `a`) gives the old `b`. So `a` now holds 3."),
+    st(["", r`    printf("a = %d, b = %d\n", a, b);`], "The values have been swapped."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "challenge", kind: "code", title: "Seconds to hh:mm:ss",
+  task: "Convert `3725` seconds to hours, minutes and seconds. Print them as `hh:mm:ss`, with each part using 2 digits.",
+  output: "01:02:05",
+  hints: [
+    "There are 3600 seconds in an hour and 60 seconds in a minute.",
+    "Get the hours first, then work on what is left over with `%`.",
+    "`h = t / 3600; rest = t % 3600; m = rest / 60; s = rest % 60;` and print with `%02d`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int t = 3725;"], "The total seconds."),
+    st(["    int h = t / 3600;", "    int rest = t % 3600;"], "3725 / 3600 is 1 hour. 3725 % 3600 is 125, the seconds still to convert."),
+    st(["    int m = rest / 60;", "    int s = rest % 60;"], "125 / 60 is 2 minutes, and 125 % 60 is 5 seconds."),
+    st(["", r`    printf("%02d:%02d:%02d\n", h, m, s);`], "`%02d` means print at least 2 characters wide and pad with a zero. So 1 becomes 01."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ar", level: "medium", kind: "predict", title: "Remainder surprises",
+  prompt: "What does this print?",
+  body: [r`    printf("%d %d\n", 17 % 5, 5 % 17);`],
+  answer: "2 5",
+  hints: ["For `5 % 17`, how many times does 17 go into 5?"],
+  why: [
+    "`17 % 5`: 5 goes into 17 three times (15). The remainder is 2.",
+    "`5 % 17`: 17 does not fit into 5 even once, so the whole 5 is the remainder.",
+    "Output: 2 5"
+  ]},
+{ topic: "ar", level: "medium", kind: "predict", title: "Negative remainder",
+  prompt: "What does this print? (Assume a modern compiler.)",
+  body: [r`    printf("%d\n", -7 % 3);`],
+  answer: "-1",
+  hints: ["Work out 7 % 3 first. Then think about which sign the answer gets."],
+  why: [
+    "`7 % 3` is 1.",
+    "In C99 and later, the result of `%` takes the sign of the left number, which is negative here.",
+    "So `-7 % 3` is -1."
+  ]},
+
+// ---------- Type conversion ----------
+{ topic: "tc", level: "easy", kind: "predict", title: "Integer division",
+  prompt: "What does this print?",
+  body: ["    int a = 7, b = 2;", r`    printf("%d\n", a / b);`],
+  answer: "3",
+  hints: ["Both `a` and `b` are `int`. What does `/` do when both sides are integers?"],
+  why: [
+    "Both operands are `int`, so C performs integer division.",
+    "7 / 2 is 3.5, but integer division drops the fraction. The answer is 3."
+  ]},
+{ topic: "tc", level: "easy", kind: "predict", title: "Mixed expression",
+  prompt: "What does this print?",
+  body: [r`    printf("%f\n", 7 / 2.0);`],
+  answer: "3.500000",
+  hints: ["`2.0` is a decimal number. What happens when `int` and `float` mix?", "`%f` always prints 6 digits after the point."],
+  why: [
+    "`7` is an int and `2.0` is a double. C converts 7 to 7.0 first.",
+    "7.0 / 2.0 is 3.5.",
+    "`%f` prints 6 digits after the point, so the output is 3.500000."
+  ]},
+{ topic: "tc", level: "easy", kind: "predict", title: "Float into int",
+  prompt: "What does this print?",
+  body: ["    float f = 5.99;", "    int i = f;", r`    printf("%d\n", i);`],
+  answer: "5",
+  hints: ["Does an `int` have a place to keep the `.99`?"],
+  why: [
+    "An `int` cannot store decimals.",
+    "When a float is stored in an int, C cuts off the decimal part. It does not round.",
+    "So 5.99 becomes 5."
+  ]},
+{ topic: "tc", level: "medium", kind: "predict", title: "The float that is not so float",
+  prompt: "What does this print?",
+  body: ["    float x = 7 / 2;", r`    printf("%.1f\n", x);`],
+  answer: "3.0",
+  hints: ["Look at what is on the right side of `=`. When is the division done, and with which types?"],
+  why: [
+    "The right side is calculated first, using only the types on that side: `7 / 2` is int divided by int.",
+    "That gives the integer 3. Only after that is 3 stored in the float `x`, as 3.0.",
+    "The fraction was already lost before the assignment, so the output is 3.0."
+  ]},
+{ topic: "tc", level: "medium", kind: "predict", title: "Characters are numbers",
+  prompt: "The ASCII code of 'A' is 65. What does this print?",
+  body: ["    char c = 'A' + 2;", r`    printf("%c %d\n", c, c);`],
+  answer: "C 67",
+  hints: ["A `char` is stored as a number. What is 65 + 2, and which letter has that code?"],
+  why: [
+    "`'A'` is the number 65, so `'A' + 2` is 67.",
+    "`%c` prints the character with code 67, which is C.",
+    "`%d` prints the number itself: 67. Output: C 67"
+  ]},
+{ topic: "tc", level: "medium", kind: "code", title: "Average of three marks",
+  task: "Marks are `85`, `90` and `78`, stored as ints. Print their average with 2 decimal places.",
+  output: "Average: 84.33",
+  hints: [
+    "The total of three ints divided by the int 3 is still integer division.",
+    "Make one side of the division a decimal, for example by dividing by `3.0`.",
+    "`float avg = (m1 + m2 + m3) / 3.0;` and print with `%.2f`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int m1 = 85, m2 = 90, m3 = 78;"], "Three marks stored as integers."),
+    st(["    float avg = (m1 + m2 + m3) / 3.0;"], "The brackets make the addition happen first (253). Dividing by `3.0` instead of `3` makes the division a decimal division: 84.3333. With plain `3` you would get 84."),
+    st([r`    printf("Average: %.2f\n", avg);`], "`%.2f` shows two decimals."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "tc", level: "medium", kind: "code", title: "Celsius to Fahrenheit",
+  task: "Convert `37` degrees Celsius (stored as an `int`) to Fahrenheit with the formula F = C x 9 / 5 + 32. Print the answer with 2 decimals.",
+  output: "Fahrenheit: 98.60",
+  hints: [
+    "If you write `c * 9 / 5` with only ints, the division loses the fraction. Check your output.",
+    "Make the expression use a decimal number, such as `9.0`.",
+    "`float f = c * 9.0 / 5 + 32;`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int c = 37;"], "The temperature in Celsius."),
+    st(["    float f = c * 9.0 / 5 + 32;"], "Left to right: `37 * 9.0` is 333.0 (a double). Dividing by 5 gives 66.6. Adding 32 gives 98.6. With `9` instead of `9.0`, the step `333 / 5` would be integer division and give 66, and the final answer would be wrong."),
+    st([r`    printf("Fahrenheit: %.2f\n", f);`], "Print with two decimals."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "tc", level: "challenge", kind: "predict", title: "Where does the cast go?",
+  prompt: "What does this print?",
+  body: ["    int a = 9, b = 2;", r`    printf("%.1f %.1f\n", (float)a / b, (float)(a / b));`],
+  answer: "4.5 4.0",
+  hints: ["A cast applies to whatever comes right after it. In the first one, that is only `a`. In the second, it is the whole bracket."],
+  why: [
+    "`(float)a / b`: the cast turns `a` into 9.0 first. Then 9.0 / 2 is a decimal division: 4.5.",
+    "`(float)(a / b)`: the bracket is calculated first. 9 / 2 is integer division, which gives 4. Then the cast turns 4 into 4.0.",
+    "Output: 4.5 4.0"
+  ]},
+
+// ---------- Operator precedence ----------
+{ topic: "op", level: "easy", kind: "predict", title: "Multiply before add",
+  prompt: "What does this print?",
+  body: [r`    printf("%d\n", 10 + 5 * 2);`],
+  answer: "20",
+  hints: ["Which operator is evaluated first, `+` or `*`?"],
+  why: [
+    "`*` has higher precedence than `+`, so `5 * 2` is calculated first: 10.",
+    "Then 10 + 10 is 20."
+  ]},
+{ topic: "op", level: "medium", kind: "predict", title: "Left to right",
+  prompt: "What does this print?",
+  body: [r`    printf("%d\n", 20 - 6 / 3 * 2 + 1);`],
+  answer: "17",
+  hints: ["`/` and `*` are on the same level. Which one goes first?"],
+  why: [
+    "`/` and `*` have the same precedence, so they go left to right: first `6 / 3` is 2.",
+    "Then `2 * 2` is 4. The expression is now `20 - 4 + 1`.",
+    "`-` and `+` also go left to right: 20 - 4 is 16, and 16 + 1 is 17."
+  ]},
+{ topic: "op", level: "medium", kind: "predict", title: "Modulo in the mix",
+  prompt: "What does this print?",
+  body: [r`    printf("%d\n", 10 % 4 * 3 + 2);`],
+  answer: "8",
+  hints: ["`%`, `*` and `/` share one precedence level and go left to right."],
+  why: [
+    "`%` and `*` are on the same level, so left to right: `10 % 4` is 2.",
+    "Then `2 * 3` is 6, and `6 + 2` is 8."
+  ]},
+{ topic: "op", level: "medium", kind: "predict", title: "Three operators, one line",
+  prompt: "What does this print?",
+  body: [r`    printf("%d\n", 2 + 3 * 4 % 5);`],
+  answer: "4",
+  hints: ["Do the `*` and `%` part first, from left to right. Add 2 at the very end."],
+  why: [
+    "`*` and `%` come before `+`, and they go left to right.",
+    "`3 * 4` is 12. Then `12 % 5` is 2.",
+    "Finally 2 + 2 is 4."
+  ]},
+{ topic: "op", level: "easy", kind: "code", title: "Brackets change the answer",
+  task: "For `a = 2`, `b = 3`, `c = 4`, `d = 2`, print the value of `a + b * c / d` and the value of `(a + b) * c / d`.",
+  output: "Without brackets: 8\nWith brackets: 10",
+  hints: [
+    "Write both expressions directly inside printf.",
+    "Without brackets, `b * c / d` goes first (left to right), then `a` is added.",
+    "`printf(\"Without brackets: %d\\n\", a + b * c / d);`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a = 2, b = 3, c = 4, d = 2;"], "The four values."),
+    st([r`    printf("Without brackets: %d\n", a + b * c / d);`], "`3 * 4` is 12, then `12 / 2` is 6, and finally `2 + 6` is 8."),
+    st([r`    printf("With brackets: %d\n", (a + b) * c / d);`], "The brackets force `2 + 3` first: 5. Then `5 * 4` is 20, and `20 / 2` is 10."),
+    st(TAIL, TAIL_SAY)
+  ]},
+
+// ---------- Relational ----------
+{ topic: "rl", level: "easy", kind: "code", title: "True is 1, false is 0",
+  task: "Print the result of each comparison. Use the exact labels shown in the expected output.",
+  output: "5 > 3  : 1\n5 < 3  : 0\n5 == 5 : 1\n5 != 5 : 0\n5 >= 5 : 1\n3 <= 2 : 0",
+  hints: [
+    "A comparison like `5 > 3` is an expression. Its value is 1 or 0.",
+    "Put the comparison in printf as an argument for `%d`.",
+    "`printf(\"5 > 3  : %d\\n\", 5 > 3);`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st([r`    printf("5 > 3  : %d\n", 5 > 3);`, r`    printf("5 < 3  : %d\n", 5 < 3);`], "C has no separate true/false type. A true comparison is the number 1 and a false one is 0."),
+    st([r`    printf("5 == 5 : %d\n", 5 == 5);`, r`    printf("5 != 5 : %d\n", 5 != 5);`], "`==` asks if two values are equal and `!=` asks if they differ."),
+    st([r`    printf("5 >= 5 : %d\n", 5 >= 5);`, r`    printf("3 <= 2 : %d\n", 3 <= 2);`], "`>=` and `<=` also count equal values as true."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "rl", level: "medium", kind: "predict", title: "Chained comparison",
+  prompt: "In maths, 3 < 5 < 2 would be false. What does this C code print?",
+  body: [r`    printf("%d\n", 3 < 5 < 2);`],
+  answer: "1",
+  hints: ["C reads it left to right as `(3 < 5) < 2`. What is `3 < 5`?"],
+  why: [
+    "`3 < 5` is true, which is the number 1.",
+    "The expression becomes `1 < 2`, which is also true: 1.",
+    "C does not understand chained comparisons the way maths does. Use `&&` to combine two comparisons."
+  ]},
+{ topic: "rl", level: "medium", kind: "predict", title: "= versus ==",
+  prompt: "What does this print?",
+  body: ["    int x = 5;", r`    printf("%d\n", x = 0);`, r`    printf("%d\n", x == 0);`],
+  answer: "0 1",
+  hints: ["The first printf contains an assignment, not a comparison. What value does `x = 0` have?"],
+  why: [
+    "`x = 0` stores 0 in `x`, and the value of an assignment is the value that was stored. So the first line prints 0.",
+    "Now `x` is 0, so `x == 0` is true and prints 1.",
+    "Output: 0 on the first line and 1 on the second."
+  ]},
+{ topic: "rl", level: "easy", kind: "code", title: "Compare two numbers",
+  task: "Read two integers `a` and `b` from the user. Print whether `a > b` and whether `a == b` as 1 or 0.",
+  input: "8 3",
+  output: "a > b: 1\na == b: 0",
+  more: [{ input: "4 4", output: "a > b: 0\na == b: 1" }],
+  hints: [
+    "Read both numbers with one `scanf`. The placeholders are `%d %d` and the variables need `&` in front.",
+    "`scanf(\"%d %d\", &a, &b);`",
+    "Then print `a > b` and `a == b` with `%d`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a, b;", r`    scanf("%d %d", &a, &b);`], "`scanf` reads from the keyboard. The `&` gives scanf the address of the variable so it can store the number there."),
+    st([r`    printf("a > b: %d\n", a > b);`, r`    printf("a == b: %d\n", a == b);`], "Each comparison gives 1 or 0."),
+    st(TAIL, TAIL_SAY)
+  ]},
+
+// ---------- Logical ----------
+{ topic: "lg", level: "easy", kind: "code", title: "The NOT operator",
+  task: "Print the value of `!0`, `!1`, `!5` and `!!7`, using the labels shown.",
+  output: "!0 = 1\n!1 = 0\n!5 = 0\n!!7 = 1",
+  hints: [
+    "`!` turns zero into 1 and any non-zero value into 0.",
+    "`!!7` is `!(!7)`.",
+    "`printf(\"!5 = %d\\n\", !5);`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st([r`    printf("!0 = %d\n", !0);`, r`    printf("!1 = %d\n", !1);`], "`!` flips: false (0) becomes 1, and true (1) becomes 0."),
+    st([r`    printf("!5 = %d\n", !5);`], "Any non-zero value counts as true, so `!5` is 0."),
+    st([r`    printf("!!7 = %d\n", !!7);`], "`!7` is 0, and `!0` is 1. A double NOT turns any non-zero value into exactly 1."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "lg", level: "medium", kind: "code", title: "AND and OR truth table",
+  task: "Print the truth table of AND and OR for all combinations of A and B (0 or 1). Calculate the AND and OR columns with `&&` and `||`.",
+  output: "A B AND OR\n0 0 0 0\n0 1 0 1\n1 0 0 1\n1 1 1 1",
+  hints: [
+    "There are four rows: 00, 01, 10 and 11.",
+    "Each row has two placeholders for the AND and OR results.",
+    "`printf(\"0 1 %d %d\\n\", 0 && 1, 0 || 1);`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st([r`    printf("A B AND OR\n");`], "The header line."),
+    st([r`    printf("0 0 %d %d\n", 0 && 0, 0 || 0);`, r`    printf("0 1 %d %d\n", 0 && 1, 0 || 1);`], "AND needs both sides true, so only the last row gives 1. OR needs at least one true, so only the first row gives 0."),
+    st([r`    printf("1 0 %d %d\n", 1 && 0, 1 || 0);`, r`    printf("1 1 %d %d\n", 1 && 1, 1 || 1);`], "The remaining two rows."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "lg", level: "easy", kind: "predict", title: "Mixing AND, OR and NOT",
+  prompt: "What does this print?",
+  body: [r`    printf("%d %d %d\n", (5 > 3) && (2 > 4), (5 > 3) || (2 > 4), !(5 > 3));`],
+  answer: "0 1 0",
+  hints: ["Work out `5 > 3` (true) and `2 > 4` (false) first, then combine them."],
+  why: [
+    "`5 > 3` is 1 and `2 > 4` is 0.",
+    "`1 && 0`: AND needs both true, so 0.",
+    "`1 || 0`: OR needs one true, so 1.",
+    "`!(1)` is 0. Output: 0 1 0"
+  ]},
+{ topic: "lg", level: "medium", kind: "code", title: "Is it between 10 and 20?",
+  task: "Read an integer `n`. Print 1 if `n` is between 10 and 20 (both included), otherwise print 0.",
+  input: "15",
+  output: "In range: 1",
+  more: [{ input: "21", output: "In range: 0" }, { input: "10", output: "In range: 1" }],
+  hints: [
+    "You need two conditions at the same time: not smaller than 10 and not bigger than 20.",
+    "Join two comparisons with `&&`.",
+    "`n >= 10 && n <= 20`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int n;", r`    scanf("%d", &n);`], "Read the number."),
+    st([r`    printf("In range: %d\n", n >= 10 && n <= 20);`], "Both comparisons must be true, so we join them with `&&`. Writing `10 <= n <= 20` would not work, because of the chained comparison problem."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "lg", level: "challenge", kind: "code", title: "Leap year check",
+  task: "Read a year. Print 1 if it is a leap year and 0 if not. A year is a leap year if it is divisible by 4, except century years, which must be divisible by 400.",
+  input: "2024",
+  output: "Leap year: 1",
+  more: [{ input: "1900", output: "Leap year: 0" }, { input: "2000", output: "Leap year: 1" }, { input: "2023", output: "Leap year: 0" }],
+  hints: [
+    "Use `%` to test divisibility: `year % 4 == 0` is true if the year is divisible by 4.",
+    "There are two ways to be a leap year: divisible by 4 but not by 100, OR divisible by 400.",
+    "`(year % 4 == 0 && year % 100 != 0) || year % 400 == 0`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int year;", r`    scanf("%d", &year);`], "Read the year."),
+    st(["    int leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;"], "The first part, `year % 4 == 0 && year % 100 != 0`, covers normal leap years like 2024. The second part, `year % 400 == 0`, covers century years like 2000. 1900 fails both, so it is not a leap year."),
+    st([r`    printf("Leap year: %d\n", leap);`], "`leap` holds 1 or 0."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "lg", level: "challenge", kind: "predict", title: "Short-circuit",
+  prompt: "What does this print? Think about whether the right side of `&&` is ever evaluated.",
+  body: ["    int a = 0, b = 5;", "    int r = a && (b = 10);", r`    printf("%d %d\n", r, b);`],
+  answer: "0 5",
+  hints: ["`a` is 0, so the left side of `&&` is already false. Does C still need to look at the right side?"],
+  why: [
+    "`a` is 0, which is false. With `&&`, the answer can only be false.",
+    "C stops here and does not evaluate `(b = 10)`. This is called short-circuit evaluation.",
+    "So `r` is 0 and `b` keeps its value 5. Output: 0 5"
+  ]},
+{ topic: "lg", level: "challenge", kind: "predict", title: "Precedence of AND and OR",
+  prompt: "What does this print?",
+  body: [r`    printf("%d\n", 5 > 3 && 2 + 2 == 5 || 10 % 3 == 1);`],
+  answer: "1",
+  hints: ["Arithmetic first, then relational, then `&&`, then `||`. Break it into three parts split at the `||`."],
+  why: [
+    "Arithmetic goes first: `2 + 2` is 4 and `10 % 3` is 1.",
+    "Now the comparisons: `5 > 3` is 1, `4 == 5` is 0, and `1 == 1` is 1.",
+    "`&&` is before `||`: `1 && 0` is 0. The expression is now `0 || 1`, which is 1."
+  ]},
+
+// ---------- Assignment ----------
+{ topic: "as", level: "easy", kind: "predict", title: "Shorthand chain",
+  prompt: "What does this print?",
+  body: ["    int x = 10;", "    x += 5;", "    x -= 3;", "    x *= 2;", r`    printf("%d\n", x);`],
+  answer: "24",
+  hints: ["`x += 5` means `x = x + 5`. Follow `x` line by line."],
+  why: [
+    "Start: x = 10.",
+    "`x += 5` makes x = 15.",
+    "`x -= 3` makes x = 12.",
+    "`x *= 2` makes x = 24."
+  ]},
+{ topic: "as", level: "medium", kind: "predict", title: "Remainder assignment",
+  prompt: "What does this print?",
+  body: ["    int x = 17;", "    x %= 5;", "    x *= 10;", r`    printf("%d\n", x);`],
+  answer: "20",
+  hints: ["`x %= 5` means `x = x % 5`."],
+  why: [
+    "`x %= 5` means `x = 17 % 5`, so x is 2.",
+    "`x *= 10` means `x = 2 * 10`, so x is 20."
+  ]},
+{ topic: "as", level: "medium", kind: "predict", title: "Divide-assign and types",
+  prompt: "What does this print?",
+  body: ["    int x = 9;", "    float y = 9;", "    x /= 2;", "    y /= 2;", r`    printf("%d %.1f\n", x, y);`],
+  answer: "4 4.5",
+  hints: ["`x /= 2` is `x = x / 2`. The type of `x` decides what kind of division happens."],
+  why: [
+    "`x` is an int, so `x /= 2` is integer division: 9 / 2 is 4.",
+    "`y` is a float, so `y /= 2` is a decimal division: 4.5.",
+    "Output: 4 4.5"
+  ]},
+{ topic: "as", level: "medium", kind: "code", title: "Bank balance",
+  task: "A `float` balance starts at `1000`. Add `500` (deposit), subtract `200` (withdrawal), then add 10% interest by multiplying by `1.1`. Use the shorthand operators and print the balance with 2 decimals.",
+  output: "Balance: 1430.00",
+  hints: [
+    "Use one shorthand operator for each step: `+=`, `-=` and `*=`.",
+    "10% interest means the new balance is 110% of the old one, which is multiplying by 1.1.",
+    "`balance += 500;` `balance -= 200;` `balance *= 1.1;`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    float balance = 1000;"], "Starting balance."),
+    st(["    balance += 500;   // 1500", "    balance -= 200;   // 1300", "    balance *= 1.1;   // 1430"], "Each shorthand is a short form of `balance = balance + 500` and so on. Interest of 10% is the same as multiplying by 1.1."),
+    st([r`    printf("Balance: %.2f\n", balance);`], "Print with 2 decimals."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "as", level: "challenge", kind: "predict", title: "Chained assignment",
+  prompt: "What does this print?",
+  body: ["    int a, b, c;", "    a = b = c = 4;", "    a += b *= 2;", r`    printf("%d %d %d\n", a, b, c);`],
+  answer: "12 8 4",
+  hints: ["Assignment goes right to left. In the line `a += b *= 2;` the part `b *= 2` is done first."],
+  why: [
+    "`a = b = c = 4` goes right to left: `c` is 4, then `b` is 4, then `a` is 4.",
+    "In `a += b *= 2`, the right part `b *= 2` is done first. `b` becomes 8, and the value of that expression is 8.",
+    "Then `a += 8` makes `a` 12. `c` was never touched, so it stays 4.",
+    "Output: 12 8 4"
+  ]},
+
+// ---------- Control preview ----------
+{ topic: "ct", level: "easy", kind: "code", title: "Even or odd",
+  task: "Read an integer. Print `Even` if it is divisible by 2, otherwise print `Odd`.",
+  input: "7",
+  output: "Odd",
+  more: [{ input: "10", output: "Even" }, { input: "0", output: "Even" }],
+  hints: [
+    "The remainder after dividing by 2 tells you everything.",
+    "`n % 2 == 0` is true for even numbers.",
+    "`if (n % 2 == 0) { printf(\"Even\\n\"); } else { printf(\"Odd\\n\"); }`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int n;", r`    scanf("%d", &n);`], "Read the number."),
+    st(["    if (n % 2 == 0) {", r`        printf("Even\n");`, "    } else {", r`        printf("Odd\n");`, "    }"], "`n % 2` is 0 for even numbers and 1 for odd numbers. The `if` runs the first block when the condition is true and the `else` block otherwise."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ct", level: "medium", kind: "code", title: "Largest of three",
+  task: "Read three integers and print the largest one.",
+  input: "4 9 6",
+  output: "Largest: 9",
+  more: [{ input: "12 3 8", output: "Largest: 12" }, { input: "1 2 3", output: "Largest: 3" }],
+  hints: [
+    "A number is the largest if it is at least as big as both of the others.",
+    "Test `a >= b && a >= c` first, then `b >= c`.",
+    "Use `if`, then `else if`, then `else`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a, b, c;", r`    scanf("%d %d %d", &a, &b, &c);`], "Read three numbers with one scanf."),
+    st(["    if (a >= b && a >= c) {", r`        printf("Largest: %d\n", a);`], "If `a` beats both `b` and `c`, it is the largest. `&&` needs both comparisons to be true."),
+    st(["    } else if (b >= c) {", r`        printf("Largest: %d\n", b);`], "`a` is not the largest here. So it is between `b` and `c`, and one comparison settles it."),
+    st(["    } else {", r`        printf("Largest: %d\n", c);`, "    }"], "If none of the above, `c` must be the largest."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ct", level: "medium", kind: "code", title: "Grade from marks",
+  task: "Read marks out of 100. Print `Grade: A` for 90 or more, `Grade: B` for 75 to 89, `Grade: C` for 50 to 74, and `Grade: Fail` for below 50.",
+  input: "82",
+  output: "Grade: B",
+  more: [{ input: "95", output: "Grade: A" }, { input: "75", output: "Grade: B" }, { input: "50", output: "Grade: C" }, { input: "40", output: "Grade: Fail" }],
+  hints: [
+    "Check from the highest range downwards, using `else if`.",
+    "Because you go from the top, you only need one comparison per range, such as `marks >= 75`.",
+    "`if (marks >= 90) ... else if (marks >= 75) ... else if (marks >= 50) ... else ...`"
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int marks;", r`    scanf("%d", &marks);`], "Read the marks."),
+    st(["    if (marks >= 90) {", r`        printf("Grade: A\n");`], "Test the best grade first."),
+    st(["    } else if (marks >= 75) {", r`        printf("Grade: B\n");`], "We only get here if marks is below 90, so `marks >= 75` really means 75 to 89."),
+    st(["    } else if (marks >= 50) {", r`        printf("Grade: C\n");`, "    } else {", r`        printf("Grade: Fail\n");`, "    }"], "Same idea for C. Everything else is a fail."),
+    st(TAIL, TAIL_SAY)
+  ]},
+{ topic: "ct", level: "challenge", kind: "code", title: "Valid triangle?",
+  task: "Read three side lengths. They form a triangle only if the sum of any two sides is greater than the third. Print `Valid triangle` or `Not a triangle`.",
+  input: "3 4 5",
+  output: "Valid triangle",
+  more: [{ input: "1 2 5", output: "Not a triangle" }, { input: "2 2 4", output: "Not a triangle" }],
+  hints: [
+    "Three conditions must all be true at the same time.",
+    "`a + b > c`, `b + c > a` and `a + c > b`.",
+    "Join the three conditions with `&&` inside one `if`."
+  ],
+  steps: [
+    st(HEAD, HEAD_SAY),
+    st(["    int a, b, c;", r`    scanf("%d %d %d", &a, &b, &c);`], "Read the three sides."),
+    st(["    if (a + b > c && b + c > a && a + c > b) {", r`        printf("Valid triangle\n");`], "All three conditions must hold, so we join them with `&&`. If any one fails, the whole condition is false."),
+    st(["    } else {", r`        printf("Not a triangle\n");`, "    }"], "Otherwise it is not a triangle. For example 2, 2, 4: `2 + 2 > 4` is false."),
+    st(TAIL, TAIL_SAY)
+  ]}
+];
+
+if (typeof module !== "undefined") module.exports = { TOPICS, QUESTIONS, HEAD, TAIL };
+
+</script>
+<script>
+/* CRunner: a small C interpreter for learning programs. Runs in the browser, no network.
+   Supports: int/char/short/long/unsigned/float/double, const, #define NAME value, arrays (1D and 2D), strings in printf,
+   printf/scanf/putchar/getchar/puts, math.h basics, all arithmetic/relational/logical/bitwise/assignment operators,
+   casts, sizeof, if/else, switch, while, do-while, for, break/continue, functions and recursion.
+   Not supported: pointers, structs, file I/O, malloc. */
+var CRunner = (function () {
+  "use strict";
+
+  function CError(msg, line, col, extra) { this.msg = msg; this.line = line; this.col = col; this.extra = extra || {}; }
+  function NeedInput() {}
+  function ExitSignal(code) { this.code = code; }
+  function RunError(msg) { this.msg = msg; }
+
+  var TYPE_KW = { "int": 1, "char": 1, "float": 1, "double": 1, "void": 1, "short": 1, "long": 1, "unsigned": 1, "signed": 1, "const": 1, "static": 1, "volatile": 1, "register": 1, "extern": 1, "auto": 1 };
+  var KEYWORDS = "auto break case char const continue default do double else enum extern float for goto if int long register return short signed sizeof static struct switch typedef union unsigned void volatile while".split(" ");
+  var KWSET = {}; KEYWORDS.forEach(function (k) { KWSET[k] = 1; });
+  var SIZE = { "char": 1, uchar: 1, "short": 2, ushort: 2, "int": 4, uint: 4, "long": 8, ulong: 8, "float": 4, "double": 8, "void": 1 };
+  var OPS = ["<<=", ">>=", "...", "->", "++", "--", "<<", ">>", "<=", ">=", "==", "!=", "&&", "||", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
+    "+", "-", "*", "/", "%", "=", "<", ">", "!", "&", "|", "^", "~", "?", ":", ";", ",", ".", "(", ")", "{", "}", "[", "]"];
+  var ASSIGN_OPS = { "=": 1, "+=": 1, "-=": 1, "*=": 1, "/=": 1, "%=": 1, "&=": 1, "|=": 1, "^=": 1, "<<=": 1, ">>=": 1 };
+  var HEADERS = { printf: "stdio.h", scanf: "stdio.h", putchar: "stdio.h", getchar: "stdio.h", puts: "stdio.h",
+    sqrt: "math.h", pow: "math.h", fabs: "math.h", floor: "math.h", ceil: "math.h", round: "math.h", trunc: "math.h", sin: "math.h", cos: "math.h", tan: "math.h",
+    log: "math.h", log10: "math.h", exp: "math.h", fmod: "math.h", cbrt: "math.h", hypot: "math.h", abs: "stdlib.h", exit: "stdlib.h", strlen: "string.h" };
+
+  /* ------------------------------------------------------------------ lexer */
+  function lex(src, ctx) {
+    var toks = [], i = 0, line = 1, col = 1, n = src.length, lineStart = true;
+    function adv(k) { for (; k > 0; k--) { if (src[i] === "\n") { line++; col = 1; } else col++; i++; } }
+    function fail(msg, l, c) { throw new CError(msg, l, c); }
+    var numRe = /(0[xX][0-9a-fA-F]+|(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)([uUlLfF]*)/y;
+    var idRe = /[A-Za-z_][A-Za-z0-9_]*/y;
+    function escape(startLine, startCol) {
+      // src[i] is the char after a backslash
+      var c = src[i], map = { n: 10, t: 9, r: 13, "0": 0, "\\": 92, "'": 39, '"': 34, a: 7, b: 8, f: 12, v: 11, "?": 63 };
+      if (c === "x") { var m = /[0-9a-fA-F]+/y; m.lastIndex = i + 1; var r = m.exec(src); if (!r) fail("\\x used with no following hex digits", line, col); adv(1 + r[0].length); return parseInt(r[0], 16) & 255; }
+      if (/[0-7]/.test(c)) { var o = /[0-7]{1,3}/y; o.lastIndex = i; var rr = o.exec(src); adv(rr[0].length); return parseInt(rr[0], 8) & 255; }
+      if (c in map) { adv(1); return map[c]; }
+      fail("unknown escape sequence: '\\" + c + "'", line, col);
+    }
+    while (i < n) {
+      var c = src[i];
+      if (c === "\n") { adv(1); lineStart = true; continue; }
+      if (c === " " || c === "\t" || c === "\r" || c === "\f" || c === "\v") { adv(1); continue; }
+      if (c === "/" && src[i + 1] === "/") { while (i < n && src[i] !== "\n") adv(1); continue; }
+      if (c === "/" && src[i + 1] === "*") { var sl = line, sc = col; adv(2); while (i < n && !(src[i] === "*" && src[i + 1] === "/")) adv(1); if (i >= n) fail("unterminated comment", sl, sc); adv(2); continue; }
+      if (c === "#" && lineStart) {
+        var dl = line, dc = col, text = "";
+        while (i < n && src[i] !== "\n") { text += src[i]; adv(1); }
+        directive(text, dl, dc, ctx);
+        continue;
+      }
+      lineStart = false;
+      var tl = line, tc = col;
+      if (/[A-Za-z_]/.test(c)) {
+        idRe.lastIndex = i; var id = idRe.exec(src)[0]; adv(id.length);
+        if (ctx.macros[id]) { ctx.macros[id].forEach(function (t) { toks.push({ t: t.t, v: t.v, line: tl, col: tc, len: id.length, ty: t.ty }); }); }
+        else toks.push({ t: "id", v: id, line: tl, col: tc, len: id.length });
+        continue;
+      }
+      if (/[0-9]/.test(c) || (c === "." && /[0-9]/.test(src[i + 1] || ""))) {
+        numRe.lastIndex = i; var m = numRe.exec(src); var body = m[1], suf = m[2].toLowerCase(), len = m[0].length;
+        if (/[A-Za-z_]/.test(src[i + len] || "")) { idRe.lastIndex = i + len; var rest = idRe.exec(src); fail('invalid suffix "' + (rest ? rest[0] : "") + '" on ' + (/[.eE]/.test(body) && !/^0[xX]/.test(body) ? "floating" : "integer") + " constant", tl, tc); }
+        adv(len);
+        var isHex = /^0[xX]/.test(body), isFloat = !isHex && /[.eE]/.test(body), val, ty;
+        if (isFloat || suf.indexOf("f") > -1 && !isHex) { val = parseFloat(body); ty = suf.indexOf("f") > -1 ? "float" : "double"; if (ty === "float") val = Math.fround(val); }
+        else {
+          val = isHex ? parseInt(body, 16) : (/^0[0-7]+$/.test(body) ? parseInt(body, 8) : parseInt(body, 10));
+          var uns = suf.indexOf("u") > -1, lng = suf.indexOf("l") > -1;
+          if (uns) ty = (lng || val > 4294967295) ? "ulong" : "uint"; else ty = (lng || val > 2147483647) ? "long" : "int";
+        }
+        toks.push({ t: "num", v: val, ty: ty, line: tl, col: tc, len: len });
+        continue;
+      }
+      if (c === '"') {
+        adv(1); var s = "";
+        for (;;) {
+          if (i >= n || src[i] === "\n") fail('missing terminating " character', tl, tc);
+          if (src[i] === '"') { adv(1); break; }
+          if (src[i] === "\\") { adv(1); s += String.fromCharCode(escape(tl, tc)); continue; }
+          s += src[i]; adv(1);
+        }
+        var prev = toks[toks.length - 1];
+        if (prev && prev.t === "str" && prev.line >= 0 && prev.adjacent) { prev.v += s; prev.len = col - prev.col; } else toks.push({ t: "str", v: s, line: tl, col: tc, len: col - tc, adjacent: true });
+        continue;
+      }
+      if (c === "'") {
+        adv(1); var cv;
+        if (src[i] === "'" || src[i] === "\n" || i >= n) fail("empty character constant", tl, tc);
+        if (src[i] === "\\") { adv(1); cv = escape(tl, tc); } else { cv = src.charCodeAt(i) & 255; adv(1); }
+        if (src[i] !== "'") fail("missing terminating ' character", tl, tc);
+        adv(1);
+        toks.push({ t: "num", v: (cv << 24) >> 24, ty: "int", chr: true, line: tl, col: tc, len: col - tc });
+        continue;
+      }
+      var op = null;
+      for (var k = 0; k < OPS.length; k++) if (src.substr(i, OPS[k].length) === OPS[k]) { op = OPS[k]; break; }
+      if (!op) fail("stray '" + c + "' in program", tl, tc);
+      adv(op.length);
+      toks.push({ t: "op", v: op, line: tl, col: tc, len: op.length });
+    }
+    toks.push({ t: "eof", v: "", line: line, col: col, len: 0 });
+    return toks;
+  }
+
+  function directive(text, line, col, ctx) {
+    var m;
+    if ((m = /^#\s*include\s*[<"]([^>"]+)[>"]/.exec(text))) { ctx.includes[m[1]] = true; return; }
+    if ((m = /^#\s*define\s+([A-Za-z_]\w*)(\(?)(.*)$/.exec(text))) {
+      if (m[2] === "(") throw new CError("function-like macros are not supported in this runner", line, col, { unsupported: true });
+      var sub = { macros: ctx.macros, includes: ctx.includes };
+      var body = m[3].replace(/\/\/.*$/, "").replace(/\/\*.*?\*\//g, "").trim();
+      var toks = body ? lex(body, sub) : [];
+      toks.pop();
+      ctx.macros[m[1]] = toks.map(function (t) { return { t: t.t, v: t.v, ty: t.ty }; });
+      return;
+    }
+    if (/^#\s*(pragma|undef|if|ifdef|ifndef|else|elif|endif|error|line)\b/.test(text)) { if (/^#\s*(if|ifdef|ifndef|else|elif|endif)\b/.test(text)) throw new CError("conditional compilation (#if, #ifdef) is not supported in this runner", line, col, { unsupported: true }); return; }
+    throw new CError("invalid preprocessing directive", line, col);
+  }
+
+  /* ----------------------------------------------------------------- parser */
+  function Parser(toks, diags) { this.t = toks; this.p = 0; this.diags = diags; this.fn = null; }
+  var P = Parser.prototype;
+  P.peek = function (o) { return this.t[Math.min(this.p + (o || 0), this.t.length - 1)]; };
+  P.next = function () { var k = this.t[this.p]; if (this.p < this.t.length - 1) this.p++; return k; };
+  P.isOp = function (v, o) { var k = this.peek(o); return k.t === "op" && k.v === v; };
+  P.isId = function (v, o) { var k = this.peek(o); return k.t === "id" && k.v === v; };
+  P.accept = function (v) { if (this.isOp(v)) { this.next(); return true; } return false; };
+  function desc(k) {
+    if (k.t === "eof") return "end of input";
+    if (k.t === "id") return "'" + k.v + "'";
+    if (k.t === "op") return "'" + k.v + "' token";
+    if (k.t === "num") return k.chr ? "character constant" : "numeric constant";
+    return "string literal";
+  }
+  P.prevEnd = function () { var k = this.t[Math.max(0, this.p - 1)]; return { line: k.line, col: k.col + (k.len || 0) }; };
+  P.expect = function (v, what) {
+    var k = this.peek();
+    if (k.t === "op" && k.v === v) return this.next();
+    var e = this.prevEnd();
+    throw new CError("expected '" + v + "' " + (what || "before " + desc(k)), e.line, e.col);
+  };
+  P.expectSemi = function () {
+    if (this.isOp(";")) { this.next(); return; }
+    var k = this.peek(), e = this.prevEnd();
+    this.diags.push({ level: "error", line: e.line, col: e.col, msg: "expected ';' before " + desc(k), fn: this.fn });
+    if (this.diags.filter(function (d) { return d.level === "error"; }).length > 8) throw new CError("too many errors", k.line, k.col);
+  };
+  P.fail = function (msg, k) { throw new CError(msg, k.line, k.col); };
+  P.unsupported = function (what, k) { throw new CError("This runner does not support " + what.charAt(0).toLowerCase() + what.slice(1) + " yet. Try it in a full C compiler.", k.line, k.col, { unsupported: true }); };
+  P.isTypeStart = function (o) { var k = this.peek(o); return k.t === "id" && TYPE_KW[k.v] === 1; };
+
+  P.typeSpec = function () {
+    var f = { uns: false, sig: false, shorts: 0, longs: 0, base: null, cons: false }, first = this.peek();
+    for (;;) {
+      var k = this.peek();
+      if (k.t !== "id" || !TYPE_KW[k.v]) break;
+      this.next();
+      switch (k.v) {
+        case "const": f.cons = true; break;
+        case "static": case "volatile": case "register": case "extern": case "auto": break;
+        case "unsigned": f.uns = true; break;
+        case "signed": f.sig = true; break;
+        case "short": f.shorts++; break;
+        case "long": f.longs++; break;
+        default: f.base = k.v;
+      }
+    }
+    var t;
+    if (f.base === "char") t = f.uns ? "uchar" : "char";
+    else if (f.base === "float") t = "float";
+    else if (f.base === "double") t = "double";
+    else if (f.base === "void") t = "void";
+    else if (f.shorts) t = f.uns ? "ushort" : "short";
+    else if (f.longs) t = f.uns ? "ulong" : "long";
+    else if (f.base === "int" || f.uns || f.sig) t = f.uns ? "uint" : "int";
+    else this.fail("expected a type", first);
+    if (f.longs && f.base === "double") t = "double";
+    return { t: t, cons: f.cons };
+  };
+
+  P.program = function () {
+    var items = [];
+    while (this.peek().t !== "eof") items.push(this.external());
+    return items;
+  };
+  P.external = function () {
+    var k = this.peek();
+    if (k.t === "id" && (k.v === "struct" || k.v === "union" || k.v === "enum" || k.v === "typedef")) this.unsupported("'" + k.v + "'", k);
+    if (!this.isTypeStart()) {
+      if (k.t === "id") this.fail("unknown type name '" + k.v + "'", k);
+      this.fail("expected declaration or statement at end of input", k);
+    }
+    var spec = this.typeSpec();
+    if (this.isOp("*")) this.unsupported("Pointers", this.peek());
+    var nameTok = this.peek();
+    if (nameTok.t !== "id" || KWSET[nameTok.v]) this.fail("expected identifier or '(' before " + desc(nameTok), nameTok);
+    if (this.isOp("(", 1)) return this.funcDef(spec, nameTok);
+    return this.declRest(spec, true);
+  };
+  P.funcDef = function (spec, nameTok) {
+    this.next(); this.next();
+    var params = [];
+    if (this.isId("void") && this.isOp(")", 1)) this.next();
+    else if (!this.isOp(")")) {
+      for (;;) {
+        if (!this.isTypeStart()) this.fail("expected a type in the parameter list", this.peek());
+        var ps = this.typeSpec();
+        if (this.isOp("*")) this.unsupported("Pointers", this.peek());
+        var pn = this.peek(), pname = "";
+        if (pn.t === "id") { pname = pn.v; this.next(); }
+        else if (!(pn.t === "op" && (pn.v === "," || pn.v === ")" || pn.v === "["))) this.fail("expected a parameter name before " + desc(pn), pn);
+        var dims = 0;
+        while (this.isOp("[")) { this.next(); if (!this.isOp("]")) this.assign(); this.expect("]"); dims++; }
+        params.push({ name: pname, t: ps.t, dims: dims, cons: ps.cons });
+        if (!this.accept(",")) break;
+      }
+    }
+    this.expect(")");
+    var f = { k: "func", name: nameTok.v, ret: spec.t, params: params, body: null, line: nameTok.line, col: nameTok.col };
+    if (this.isOp(";")) { this.next(); return f; }
+    this.fn = f.name;
+    if (!this.isOp("{")) this.fail("expected '{' before " + desc(this.peek()), this.peek());
+    f.body = this.block();
+    this.fn = null;
+    return f;
+  };
+  // after the type spec: declarators separated by commas, ending in ';'
+  P.declRest = function (spec, top) {
+    var decls = [], first = this.peek();
+    for (;;) {
+      if (this.isOp("*")) this.unsupported("Pointers", this.peek());
+      var nt = this.peek();
+      if (nt.t !== "id" || KWSET[nt.v]) this.fail("expected identifier or '(' before " + desc(nt), nt);
+      this.next();
+      var d = { name: nt.v, t: spec.t, cons: spec.cons, dims: [], init: null, line: nt.line, col: nt.col };
+      while (this.isOp("[")) {
+        this.next();
+        if (this.isOp("]")) d.dims.push(null); else d.dims.push(this.assign());
+        this.expect("]");
+      }
+      if (this.accept("=")) d.init = this.isOp("{") ? this.initList() : this.assign();
+      if (spec.t === "void") this.fail("variable or field '" + d.name + "' declared void", nt);
+      decls.push(d);
+      if (!this.accept(",")) break;
+    }
+    this.expectSemi();
+    return { k: "decl", decls: decls, line: first.line, col: first.col };
+  };
+  P.initList = function () {
+    this.expect("{");
+    var items = [];
+    while (!this.isOp("}")) { items.push(this.isOp("{") ? this.initList() : this.assign()); if (!this.accept(",")) break; }
+    this.expect("}");
+    return { k: "initlist", items: items };
+  };
+
+  P.block = function () {
+    var open = this.expect("{"), stmts = [];
+    while (!this.isOp("}")) {
+      if (this.peek().t === "eof") throw new CError("expected '}' at end of input", this.peek().line, this.peek().col);
+      stmts.push(this.statement());
+    }
+    this.next();
+    return { k: "block", stmts: stmts, line: open.line };
+  };
+  P.condWarn = function (e) {
+    if (e && e.k === "assign" && e.op === "=" && !e.paren) this.diags.push({ level: "warning", line: e.line, col: e.col, msg: "suggest parentheses around assignment used as truth value", fn: this.fn });
+  };
+  P.statement = function () {
+    var k = this.peek();
+    if (k.t === "op") {
+      if (k.v === "{") return this.block();
+      if (k.v === ";") { this.next(); return { k: "empty" }; }
+    }
+    if (k.t === "id") {
+      switch (k.v) {
+        case "if": {
+          this.next(); this.expect("("); var c = this.expr(); this.expect(")"); this.condWarn(c);
+          var th = this.statement(), el = null;
+          if (this.isId("else")) { this.next(); el = this.statement(); }
+          return { k: "if", c: c, th: th, el: el, line: k.line };
+        }
+        case "while": { this.next(); this.expect("("); var wc = this.expr(); this.expect(")"); this.condWarn(wc); return { k: "while", c: wc, body: this.statement(), line: k.line }; }
+        case "do": {
+          this.next(); var body = this.statement();
+          if (!this.isId("while")) this.fail("expected 'while' before " + desc(this.peek()), this.peek());
+          this.next(); this.expect("("); var dc = this.expr(); this.expect(")"); this.expectSemi();
+          return { k: "dowhile", c: dc, body: body, line: k.line };
+        }
+        case "for": {
+          this.next(); this.expect("(");
+          var init = null;
+          if (this.isOp(";")) this.next();
+          else if (this.isTypeStart()) { var sp = this.typeSpec(); init = this.declRest(sp, false); }
+          else { init = { k: "expr", e: this.expr() }; this.expect(";"); }
+          var cond = null; if (!this.isOp(";")) cond = this.expr(); this.expect(";"); this.condWarn(cond);
+          var step = null; if (!this.isOp(")")) step = this.expr(); this.expect(")");
+          return { k: "for", init: init, c: cond, step: step, body: this.statement(), line: k.line };
+        }
+        case "switch": return this.switchStmt();
+        case "break": this.next(); this.expectSemi(); return { k: "break", line: k.line, col: k.col };
+        case "continue": this.next(); this.expectSemi(); return { k: "continue", line: k.line, col: k.col };
+        case "return": {
+          this.next(); var e = null; if (!this.isOp(";")) e = this.expr(); this.expectSemi();
+          return { k: "return", e: e, line: k.line, col: k.col };
+        }
+        case "goto": this.unsupported("'goto'", k); break;
+        case "struct": case "union": case "enum": case "typedef": this.unsupported("'" + k.v + "'", k); break;
+        case "else": this.fail("'else' without a previous 'if'", k); break;
+        case "case": case "default": this.fail("'" + k.v + "' label not within a switch statement", k); break;
+      }
+      if (TYPE_KW[k.v] === 1) { var spec = this.typeSpec(); return this.declRest(spec, false); }
+    }
+    var ex = this.expr(); this.expectSemi();
+    return { k: "expr", e: ex, line: k.line };
+  };
+  P.switchStmt = function () {
+    var k = this.next(); this.expect("("); var e = this.expr(); this.expect(")"); this.expect("{");
+    var cases = [], cur = null;
+    while (!this.isOp("}")) {
+      var t = this.peek();
+      if (t.t === "eof") throw new CError("expected '}' at end of input", t.line, t.col);
+      if (t.t === "id" && t.v === "case") { this.next(); var v = this.cond(); this.expect(":"); cur = { val: v, stmts: [] }; cases.push(cur); }
+      else if (t.t === "id" && t.v === "default") { this.next(); this.expect(":"); cur = { val: null, stmts: [] }; cases.push(cur); }
+      else { if (!cur) this.fail("statement before the first 'case' in a switch", t); cur.stmts.push(this.statement()); }
+    }
+    this.next();
+    return { k: "switch", e: e, cases: cases, line: k.line };
+  };
+
+  /* expressions */
+  P.expr = function () {
+    var e = this.assign();
+    while (this.isOp(",")) { var c = this.next(); e = { k: "comma", l: e, r: this.assign(), line: c.line, col: c.col }; }
+    return e;
+  };
+  function isLvalue(n) { return n.k === "id" || n.k === "idx"; }
+  P.assign = function () {
+    var l = this.cond(), k = this.peek();
+    if (k.t === "op" && ASSIGN_OPS[k.v]) {
+      if (!isLvalue(l)) throw new CError("lvalue required as left operand of assignment", k.line, k.col);
+      this.next();
+      var r = this.assign();
+      return { k: "assign", op: k.v, l: l, r: r, line: k.line, col: k.col };
+    }
+    return l;
+  };
+  P.cond = function () {
+    var c = this.bin(0);
+    if (this.isOp("?")) {
+      var q = this.next(); var a = this.expr(); this.expect(":"); var b = this.cond();
+      this.condWarn(c);
+      return { k: "cond", c: c, a: a, b: b, line: q.line, col: q.col };
+    }
+    return c;
+  };
+  var LEVELS = [["||"], ["&&"], ["|"], ["^"], ["&"], ["==", "!="], ["<", ">", "<=", ">="], ["<<", ">>"], ["+", "-"], ["*", "/", "%"]];
+  P.bin = function (lv) {
+    if (lv >= LEVELS.length) return this.unary();
+    var l = this.bin(lv + 1);
+    for (;;) {
+      var k = this.peek();
+      if (k.t === "op" && LEVELS[lv].indexOf(k.v) > -1) {
+        this.next(); var r = this.bin(lv + 1);
+        if (k.v === "&&" || k.v === "||") { this.condWarn(l); this.condWarn(r); }
+        l = { k: k.v === "&&" || k.v === "||" ? "logic" : "bin", op: k.v, l: l, r: r, line: k.line, col: k.col };
+      } else return l;
+    }
+  };
+  P.unary = function () {
+    var k = this.peek();
+    if (k.t === "op") {
+      if (k.v === "++" || k.v === "--") {
+        this.next(); var e = this.unary();
+        if (!isLvalue(e)) throw new CError("lvalue required as " + (k.v === "++" ? "increment" : "decrement") + " operand", k.line, k.col);
+        return { k: "incdec", op: k.v, pre: true, e: e, line: k.line, col: k.col };
+      }
+      if (k.v === "+" || k.v === "-" || k.v === "!" || k.v === "~") { this.next(); return { k: "un", op: k.v, e: this.unary(), line: k.line, col: k.col }; }
+      if (k.v === "&") this.unsupported("The address-of operator (&) outside scanf", k);
+      if (k.v === "*") this.unsupported("Pointers", k);
+      if (k.v === "(" && this.isTypeStart(1)) {
+        this.next(); var sp = this.typeSpec();
+        if (this.isOp("*")) this.unsupported("Pointers", this.peek());
+        this.expect(")");
+        return { k: "cast", t: sp.t, e: this.unary(), line: k.line, col: k.col };
+      }
+    }
+    if (k.t === "id" && k.v === "sizeof") {
+      this.next();
+      if (this.isOp("(") && this.isTypeStart(1)) { this.next(); var s2 = this.typeSpec(); if (this.isOp("*")) { this.next(); this.expect(")"); return { k: "sizeof", t: "ptr", line: k.line }; } this.expect(")"); return { k: "sizeof", t: s2.t, line: k.line }; }
+      return { k: "sizeof", e: this.unary(), line: k.line };
+    }
+    return this.postfix();
+  };
+  P.postfix = function () {
+    var e = this.primary();
+    for (;;) {
+      var k = this.peek();
+      if (k.t !== "op") return e;
+      if (k.v === "[") {
+        if (e.k !== "id" && e.k !== "idx") this.fail("subscripted value is neither array nor pointer", k);
+        this.next(); var ix = this.expr(); this.expect("]");
+        if (e.k === "id") e = { k: "idx", name: e.name, idx: [ix], line: e.line, col: e.col }; else e.idx.push(ix);
+      } else if (k.v === "++" || k.v === "--") {
+        if (!isLvalue(e)) throw new CError("lvalue required as " + (k.v === "++" ? "increment" : "decrement") + " operand", k.line, k.col);
+        this.next(); e = { k: "incdec", op: k.v, pre: false, e: e, line: k.line, col: k.col };
+      } else if (k.v === "(" ) {
+        this.fail("called object is not a function or function pointer", k);
+      } else if (k.v === "." || k.v === "->") this.unsupported("Structs", k);
+      else return e;
+    }
+  };
+  P.primary = function () {
+    var k = this.peek();
+    if (k.t === "num") { this.next(); return { k: "num", v: k.v, ty: k.ty, line: k.line, col: k.col }; }
+    if (k.t === "str") { this.next(); return { k: "str", v: k.v, line: k.line, col: k.col }; }
+    if (k.t === "op" && k.v === "(") { this.next(); var e = this.expr(); this.expect(")"); e.paren = true; return e; }
+    if (k.t === "id") {
+      if (KWSET[k.v]) this.fail("expected expression before '" + k.v + "'", k);
+      this.next();
+      if (this.isOp("(")) {
+        this.next(); var args = [];
+        if (!this.isOp(")")) for (;;) { args.push(this.assign()); if (!this.accept(",")) break; }
+        this.expect(")");
+        return { k: "call", name: k.v, args: args, line: k.line, col: k.col };
+      }
+      return { k: "id", name: k.v, line: k.line, col: k.col };
+    }
+    this.fail("expected expression before " + desc(k), k);
+  };
+
+  /* --------------------------------------------------------- type helpers */
+  function isFloat(t) { return t === "float" || t === "double"; }
+  function promote(t) { return (t === "char" || t === "uchar" || t === "short" || t === "ushort") ? "int" : t; }
+  function common(a, b) {
+    if (a === "double" || b === "double") return "double";
+    if (a === "float" || b === "float") return "float";
+    a = promote(a); b = promote(b);
+    if (a === "ulong" || b === "ulong") return "ulong";
+    if (a === "long" || b === "long") return "long";
+    if (a === "uint" || b === "uint") return "uint";
+    return "int";
+  }
+  function wrap(t, x) {
+    switch (t) {
+      case "int": return x | 0;
+      case "uint": return x >>> 0;
+      case "char": return (x << 24) >> 24;
+      case "uchar": return x & 255;
+      case "short": return (x << 16) >> 16;
+      case "ushort": return x & 65535;
+      case "ulong": return x < 0 ? x + 18446744073709551616 : x;
+      default: return x;
+    }
+  }
+  function cvt(v, from, to) {
+    if (to === "double") return v;
+    if (to === "float") return Math.fround(v);
+    if (isFloat(from)) {
+      if (!isFinite(v)) v = -2147483648; else v = Math.trunc(v);
+    }
+    return wrap(to, v);
+  }
+
+  /* ------------------------------------------------------------ interpreter */
+  function Run(prog, opts, includes) {
+    this.funcs = {}; this.globals = { vars: Object.create(null), parent: null };
+    this.out = ""; this.marks = []; this.warns = []; this.warnSeen = {};
+    this.buf = opts.buf; this.pos = 0; this.lineStarts = opts.lineStarts; this.markedLines = {}; this.eof = opts.eof;
+    this.deadline = Date.now() + (opts.maxMs || 2500); this.steps = 0; this.depth = 0; this.includes = includes;
+    this.curLine = 0;
+  }
+  var R = Run.prototype;
+  var BRK = { c: "break" }, CNT = { c: "continue" };
+
+  R.tick = function () {
+    if ((++this.steps & 2047) === 0 && Date.now() > this.deadline) throw { timeout: true };
+  };
+  R.warn = function (msg, line, col) {
+    var key = msg + "@" + line; if (this.warnSeen[key]) return; this.warnSeen[key] = 1;
+    this.warns.push({ level: "warning", line: line || this.curLine, col: col || 0, msg: msg, fn: "main", runtime: true });
+  };
+  R.write = function (s) {
+    this.out += s;
+    if (this.out.length > 200000) throw new RunError("Output limit reached (200000 characters). Stopped.");
+  };
+  R.lookup = function (env, name) {
+    for (var e = env; e; e = e.parent) { var v = e.vars[name]; if (v) return v; }
+    return null;
+  };
+  R.declare = function (env, d, evalInit) {
+    var self = this;
+    if (d.dims.length) {
+      var dims = d.dims.map(function (x) { return x === null ? null : Math.trunc(self.ev(x, env).v); });
+      var v = { name: d.name, arr: true, et: d.t, dims: dims, cons: d.cons, init: true };
+      var strInit = d.init && d.init.k === "str";
+      if (dims[0] === null) {
+        if (strInit) dims[0] = d.init.v.length + 1;
+        else if (d.init && d.init.k === "initlist") dims[0] = d.init.items.length;
+        else throw new RunError("array size missing in '" + d.name + "'");
+      }
+      var total = dims.reduce(function (a, b) { return a * b; }, 1);
+      if (!(total >= 0) || total > 1000000) throw new RunError("array '" + d.name + "' has an invalid size");
+      v.data = new Array(total); for (var i = 0; i < total; i++) v.data[i] = 0;
+      if (d.init) {
+        if (strInit) { for (var j = 0; j < d.init.v.length && j < total; j++) v.data[j] = d.init.v.charCodeAt(j); }
+        else if (d.init.k === "initlist") {
+          var flat = [];
+          (function walk(l, depth) {
+            l.items.forEach(function (it) {
+              if (it.k === "initlist") {
+                var rowLen = dims.slice(depth + 1).reduce(function (a, b) { return a * b; }, 1), startLen = flat.length;
+                walk(it, depth + 1);
+                while ((flat.length - startLen) < rowLen) flat.push(0);
+              } else flat.push(cvt(self.ev(it, env).v, self.ev(it, env).t, d.t));
+            });
+          })(d.init, 0);
+          for (var q = 0; q < flat.length && q < total; q++) v.data[q] = flat[q];
+        }
+      } else if (!d.global) { v.uninit = true; }
+      env.vars[d.name] = v;
+      return;
+    }
+    var sv = { name: d.name, t: d.t, v: 0, cons: d.cons, init: !!d.init || !!d.global };
+    if (d.init) {
+      var val = this.ev(d.init, env);
+      if (val.t === "str" || val.t === "arr") throw new RunError("cannot initialise '" + d.name + "' from a string");
+      sv.v = cvt(val.v, val.t, d.t); sv.init = true;
+    }
+    env.vars[d.name] = sv;
+  };
+
+  R.ex = function (n, env) {
+    this.tick();
+    switch (n.k) {
+      case "expr": this.curLine = n.line; this.ev(n.e, env); return;
+      case "decl": { this.curLine = n.line; for (var i = 0; i < n.decls.length; i++) this.declare(env, n.decls[i]); return; }
+      case "block": {
+        var inner = { vars: Object.create(null), parent: env };
+        for (var j = 0; j < n.stmts.length; j++) { var r = this.ex(n.stmts[j], inner); if (r) return r; }
+        return;
+      }
+      case "empty": return;
+      case "if": {
+        this.curLine = n.line;
+        if (this.truthy(this.ev(n.c, env))) return this.ex(n.th, env);
+        else if (n.el) return this.ex(n.el, env);
+        return;
+      }
+      case "while":
+        while (this.truthy(this.ev(n.c, env))) {
+          this.tick();
+          var w = this.ex(n.body, env);
+          if (w === BRK) break; if (w && w !== CNT) return w;
+        }
+        return;
+      case "dowhile":
+        do {
+          this.tick();
+          var dw = this.ex(n.body, env);
+          if (dw === BRK) break; if (dw && dw !== CNT) return dw;
+        } while (this.truthy(this.ev(n.c, env)));
+        return;
+      case "for": {
+        var fenv = { vars: Object.create(null), parent: env };
+        if (n.init) this.ex(n.init, fenv);
+        while (!n.c || this.truthy(this.ev(n.c, fenv))) {
+          this.tick();
+          var f = this.ex(n.body, fenv);
+          if (f === BRK) break; if (f && f !== CNT) return f;
+          if (n.step) this.ev(n.step, fenv);
+        }
+        return;
+      }
+      case "switch": {
+        this.curLine = n.line;
+        var sv = this.ev(n.e, env).v, start = -1, def = -1;
+        for (var c = 0; c < n.cases.length; c++) {
+          if (n.cases[c].val === null) def = c; else if (this.ev(n.cases[c].val, env).v === sv && start < 0) start = c;
+        }
+        if (start < 0) start = def;
+        if (start < 0) return;
+        var senv = { vars: Object.create(null), parent: env };
+        for (var ci = start; ci < n.cases.length; ci++) {
+          for (var si = 0; si < n.cases[ci].stmts.length; si++) {
+            var sr = this.ex(n.cases[ci].stmts[si], senv);
+            if (sr === BRK) return; if (sr) return sr;
+          }
+        }
+        return;
+      }
+      case "break": return BRK;
+      case "continue": return CNT;
+      case "return": {
+        this.curLine = n.line;
+        return { c: "ret", v: n.e ? this.ev(n.e, env) : null };
+      }
+    }
+    throw new RunError("internal: unknown statement " + n.k);
+  };
+
+  R.truthy = function (v) { return v.v !== 0; };
+  R.readVar = function (env, node) {
+    var v = this.lookup(env, node.name);
+    if (!v) throw new RunError("'" + node.name + "' is not declared");
+    if (v.arr) return { t: "arr", ref: v, v: 0 };
+    if (!v.init) { v.init = true; this.warn("'" + node.name + "' is used uninitialized", node.line, node.col); }
+    return { t: v.t, v: v.v };
+  };
+  R.elemRef = function (env, node) {
+    var v = this.lookup(env, node.name);
+    if (!v || !v.arr) throw new RunError("'" + node.name + "' is not an array");
+    if (node.idx.length > v.dims.length) throw new RunError("too many subscripts for '" + node.name + "'");
+    var off = 0, stride = 1, i;
+    for (i = v.dims.length - 1; i >= 0; i--) {
+      if (i < node.idx.length) {
+        var ix = this.ev(node.idx[i], env).v;
+        if (!(ix >= 0 && ix < v.dims[i])) throw new RunError("Array index out of range: " + node.name + "[" + ix + "] but the size is " + v.dims[i] + ". In C this is undefined behaviour, and it may crash or corrupt other data.");
+        off += ix * stride;
+      }
+      stride *= v.dims[i];
+    }
+    if (node.idx.length < v.dims.length) return { sub: true, v: v };
+    return { v: v, off: off };
+  };
+  R.ev = function (n, env) {
+    switch (n.k) {
+      case "num": return { t: n.ty, v: n.v };
+      case "str": return { t: "str", v: n.v };
+      case "id": return this.readVar(env, n);
+      case "idx": {
+        var ref = this.elemRef(env, n);
+        if (ref.sub) return { t: "arr", ref: ref.v, v: 0 };
+        return { t: ref.v.et, v: ref.v.data[ref.off] };
+      }
+      case "comma": this.ev(n.l, env); return this.ev(n.r, env);
+      case "un": {
+        var e = this.ev(n.e, env);
+        if (e.t === "str" || e.t === "arr") throw new RunError("invalid operand to unary '" + n.op + "'");
+        if (n.op === "!") return { t: "int", v: e.v === 0 ? 1 : 0 };
+        var pt = promote(e.t);
+        if (n.op === "+") return { t: pt, v: e.v };
+        if (n.op === "-") return { t: pt, v: isFloat(pt) ? -e.v : wrap(pt, -e.v) };
+        if (isFloat(pt)) throw new RunError("wrong type argument to bit-complement");
+        return { t: pt, v: wrap(pt, ~e.v) };
+      }
+      case "bin": return this.binary(n.op, this.ev(n.l, env), this.ev(n.r, env), n);
+      case "logic": {
+        var a = this.truthy(this.ev(n.l, env));
+        if (n.op === "&&") return { t: "int", v: a && this.truthy(this.ev(n.r, env)) ? 1 : 0 };
+        return { t: "int", v: a || this.truthy(this.ev(n.r, env)) ? 1 : 0 };
+      }
+      case "cond": return this.truthy(this.ev(n.c, env)) ? this.ev(n.a, env) : this.ev(n.b, env);
+      case "cast": {
+        var cv = this.ev(n.e, env);
+        if (n.t === "void") return { t: "int", v: 0 };
+        return { t: n.t, v: cvt(cv.v, cv.t, n.t) };
+      }
+      case "sizeof": {
+        if (n.t) return { t: "ulong", v: n.t === "ptr" ? 8 : SIZE[n.t] };
+        var ty = this.sizeOf(n.e, env);
+        return { t: "ulong", v: ty };
+      }
+      case "assign": return this.assignOp(n, env);
+      case "incdec": {
+        var tgt = this.target(n.e, env), cur = this.getT(tgt, n.e);
+        var nv = { t: cur.t, v: isFloat(cur.t) ? (n.op === "++" ? cur.v + 1 : cur.v - 1) : wrap(cur.t, n.op === "++" ? cur.v + 1 : cur.v - 1) };
+        if (cur.t === "float") nv.v = Math.fround(nv.v);
+        this.setT(tgt, nv.v);
+        return n.pre ? nv : cur;
+      }
+      case "call": return this.call(n, env);
+      case "addrof": throw new RunError("The address-of operator (&) is only supported inside scanf in this runner.");
+    }
+    throw new RunError("internal: unknown expression " + n.k);
+  };
+  R.sizeOf = function (e, env) {
+    if (e.k === "id") { var v = this.lookup(env, e.name); if (v && v.arr) return v.data.length * SIZE[v.et]; if (v) return SIZE[v.t]; }
+    if (e.k === "idx") { var w = this.lookup(env, e.name); if (w && w.arr) { if (e.idx.length < w.dims.length) return w.dims.slice(e.idx.length).reduce(function (a, b) { return a * b; }, 1) * SIZE[w.et]; return SIZE[w.et]; } }
+    if (e.k === "str") return e.v.length + 1;
+    if (e.k === "num") return SIZE[e.ty];
+    if (e.k === "cast") return SIZE[e.t];
+    if (e.k === "call") { var f = this.funcs[e.name]; if (f) return SIZE[f.ret]; return 8; }
+    if (e.k === "assign") return this.sizeOf(e.l, env);
+    if (e.k === "bin" || e.k === "cond") {
+      var l = e.k === "bin" ? e.l : e.a, r = e.k === "bin" ? e.r : e.b;
+      if (e.k === "bin" && ["<", ">", "<=", ">=", "==", "!="].indexOf(e.op) > -1) return 4;
+      var ts = { 1: "char", 2: "short", 4: "int", 8: "long" }, a = this.sizeOf(l, env), b = this.sizeOf(r, env);
+      var lt = this.typeName(l, env), rt = this.typeName(r, env);
+      return SIZE[common(lt, rt)] || Math.max(a, b);
+    }
+    if (e.k === "logic") return 4;
+    if (e.k === "un") return e.op === "!" ? 4 : SIZE[promote(this.typeName(e.e, env))];
+    if (e.k === "incdec") return this.sizeOf(e.e, env);
+    return 4;
+  };
+  R.typeName = function (e, env) {
+    switch (e.k) {
+      case "num": return e.ty;
+      case "id": { var v = this.lookup(env, e.name); return v && !v.arr ? v.t : "int"; }
+      case "idx": { var w = this.lookup(env, e.name); return w ? w.et : "int"; }
+      case "cast": return e.t;
+      case "call": { var f = this.funcs[e.name]; return f ? f.ret : "double"; }
+      case "bin": return common(this.typeName(e.l, env), this.typeName(e.r, env));
+      case "cond": return common(this.typeName(e.a, env), this.typeName(e.b, env));
+      case "un": return promote(this.typeName(e.e, env));
+      case "assign": return this.typeName(e.l, env);
+      default: return "int";
+    }
+  };
+  R.target = function (node, env) {
+    if (node.k === "id") {
+      var v = this.lookup(env, node.name);
+      if (!v) throw new RunError("'" + node.name + "' is not declared");
+      if (v.arr) throw new RunError("assignment to expression with array type");
+      return { kind: "var", v: v };
+    }
+    var ref = this.elemRef(env, node);
+    if (ref.sub) throw new RunError("assignment to expression with array type");
+    return { kind: "elem", v: ref.v, off: ref.off };
+  };
+  R.getT = function (t, node) {
+    if (t.kind === "var") {
+      if (!t.v.init) { t.v.init = true; this.warn("'" + t.v.name + "' is used uninitialized", node.line, node.col); }
+      return { t: t.v.t, v: t.v.v };
+    }
+    return { t: t.v.et, v: t.v.data[t.off] };
+  };
+  R.setT = function (t, val) { if (t.kind === "var") { t.v.v = val; t.v.init = true; } else t.v.data[t.off] = val; };
+  R.assignOp = function (n, env) {
+    var tgt = this.target(n.l, env), rhs = this.ev(n.r, env);
+    if (rhs.t === "str" || rhs.t === "arr") throw new RunError("incompatible types in assignment");
+    var ty = tgt.kind === "var" ? tgt.v.t : tgt.v.et, val;
+    if (n.op === "=") val = cvt(rhs.v, rhs.t, ty);
+    else {
+      var cur = this.getT(tgt, n.l), res = this.binary(n.op.slice(0, -1), cur, rhs, n);
+      val = cvt(res.v, res.t, ty);
+    }
+    this.setT(tgt, val);
+    return { t: ty, v: val };
+  };
+  R.binary = function (op, a, b, node) {
+    if (a.t === "str" || a.t === "arr" || b.t === "str" || b.t === "arr") throw new RunError("invalid operands to binary '" + op + "' (pointers are not supported in this runner)");
+    var t = common(a.t, b.t), x = cvt(a.v, a.t, t), y = cvt(b.v, b.t, t), r;
+    switch (op) {
+      case "<": return { t: "int", v: x < y ? 1 : 0 };
+      case ">": return { t: "int", v: x > y ? 1 : 0 };
+      case "<=": return { t: "int", v: x <= y ? 1 : 0 };
+      case ">=": return { t: "int", v: x >= y ? 1 : 0 };
+      case "==": return { t: "int", v: x === y ? 1 : 0 };
+      case "!=": return { t: "int", v: x !== y ? 1 : 0 };
+    }
+    if (isFloat(t)) {
+      switch (op) {
+        case "+": r = x + y; break; case "-": r = x - y; break; case "*": r = x * y; break; case "/": r = x / y; break;
+        default: throw new RunError("invalid operands to binary " + op + " (have floating types)");
+      }
+      return { t: t, v: t === "float" ? Math.fround(r) : r };
+    }
+    switch (op) {
+      case "+": r = t === "int" ? (x + y) | 0 : t === "uint" ? (x + y) >>> 0 : wrap(t, x + y); break;
+      case "-": r = t === "int" ? (x - y) | 0 : t === "uint" ? (x - y) >>> 0 : wrap(t, x - y); break;
+      case "*": r = t === "int" ? Math.imul(x, y) : t === "uint" ? Math.imul(x, y) >>> 0 : wrap(t, x * y); break;
+      case "/": if (y === 0) throw new RunError("Floating point exception (core dumped)"); r = wrap(t, Math.trunc(x / y)); break;
+      case "%": if (y === 0) throw new RunError("Floating point exception (core dumped)"); r = x % y; if (r === 0) r = 0; break;
+      case "&": case "|": case "^":
+        if (t === "long" || t === "ulong") { var X = BigInt(x), Y = BigInt(y); r = Number(BigInt.asIntN(64, op === "&" ? X & Y : op === "|" ? X | Y : X ^ Y)); }
+        else { r = op === "&" ? x & y : op === "|" ? x | y : x ^ y; r = wrap(t, r); }
+        break;
+      case "<<": case ">>": {
+        var lt = promote(a.t), cnt = b.v | 0; r = cvt(a.v, a.t, lt);
+        if (lt === "long" || lt === "ulong") r = Number(BigInt.asIntN(64, op === "<<" ? BigInt(r) << BigInt(cnt) : BigInt(r) >> BigInt(cnt)));
+        else r = wrap(lt, op === "<<" ? r << cnt : (lt === "uint" ? r >>> cnt : r >> cnt));
+        return { t: lt, v: r };
+      }
+      default: throw new RunError("internal: bad operator " + op);
+    }
+    return { t: t, v: r };
+  };
+
+  /* ------------------------------------------------------------ calls and library */
+  R.call = function (n, env) {
+    this.curLine = n.line;
+    var name = n.name, f = this.funcs[name];
+    if (f && f.body) return this.callUser(f, n, env);
+    var args = n.args;
+    switch (name) {
+      case "printf": {
+        if (!args.length) throw new RunError("printf needs a format string");
+        var fmtv = this.ev(args[0], env);
+        if (fmtv.t !== "str" && fmtv.t !== "arr") throw new RunError("printf expects a format string as its first argument");
+        var vals = []; for (var i = 1; i < args.length; i++) vals.push(this.ev(args[i], env));
+        var s = this.formatPrintf(this.strOf(fmtv), vals, n);
+        this.write(s);
+        return { t: "int", v: s.length };
+      }
+      case "puts": { var pv = this.ev(args[0], env); var ps = this.strOf(pv) + "\n"; this.write(ps); return { t: "int", v: 1 }; }
+      case "putchar": { var cv = this.ev(args[0], env); this.write(String.fromCharCode(cv.v & 255)); return { t: "int", v: cv.v & 255 }; }
+      case "getchar": { var ch = this.peekc(); if (ch === null) return { t: "int", v: -1 }; this.pos++; return { t: "int", v: ch.charCodeAt(0) }; }
+      case "scanf": return this.scanf(n, env);
+      case "exit": throw new ExitSignal(args.length ? this.ev(args[0], env).v | 0 : 0);
+      case "strlen": { var sv = this.ev(args[0], env); return { t: "ulong", v: this.strOf(sv).length }; }
+      case "abs": { var av = this.ev(args[0], env); return { t: "int", v: Math.abs(cvt(av.v, av.t, "int")) | 0 }; }
+    }
+    var M = { sqrt: Math.sqrt, fabs: Math.abs, floor: Math.floor, ceil: Math.ceil, trunc: Math.trunc, sin: Math.sin, cos: Math.cos, tan: Math.tan, log: Math.log, log10: Math.log10, exp: Math.exp, cbrt: Math.cbrt,
+      round: function (x) { return x < 0 ? -Math.round(-x) : Math.round(x); } };
+    if (M[name]) { var mv = this.ev(args[0], env); return { t: "double", v: M[name](mv.v) }; }
+    if (name === "pow" || name === "fmod" || name === "hypot") {
+      var p1 = this.ev(args[0], env), p2 = this.ev(args[1], env);
+      return { t: "double", v: name === "pow" ? Math.pow(p1.v, p2.v) : name === "hypot" ? Math.hypot(p1.v, p2.v) : p1.v % p2.v };
+    }
+    throw new RunError("undefined reference to `" + name + "'");
+  };
+  R.callUser = function (f, n, env) {
+    if (n.args.length !== f.params.length) throw new RunError("wrong number of arguments to " + f.name);
+    if (++this.depth > 1500) { this.depth = 0; throw new RunError("Segmentation fault (core dumped)\n(The program called itself too many times. Check that your recursion has a stopping condition.)"); }
+    var fenv = { vars: Object.create(null), parent: this.globals };
+    for (var i = 0; i < f.params.length; i++) {
+      var p = f.params[i], a = this.ev(n.args[i], env);
+      if (p.dims) {
+        if (a.t !== "arr") throw new RunError("argument " + (i + 1) + " of " + f.name + " must be an array");
+        fenv.vars[p.name] = a.ref;
+      } else {
+        if (a.t === "str" || a.t === "arr") throw new RunError("passing a string or array where a number is expected");
+        fenv.vars[p.name] = { name: p.name, t: p.t, v: cvt(a.v, a.t, p.t), init: true, cons: p.cons };
+      }
+    }
+    var r = this.ex(f.body, fenv);
+    this.depth--;
+    if (r && r.c === "ret" && r.v) return f.ret === "void" ? { t: "int", v: 0 } : { t: f.ret, v: cvt(r.v.v, r.v.t, f.ret) };
+    return { t: f.ret === "void" ? "int" : f.ret, v: 0 };
+  };
+  R.strOf = function (v) {
+    if (v.t === "str") return v.v;
+    if (v.t === "arr") { var s = "", d = v.ref.data; for (var i = 0; i < d.length && d[i] !== 0; i++) s += String.fromCharCode(d[i] & 255); return s; }
+    throw new RunError("Segmentation fault (core dumped)\n(A number was used where text was expected, for example %s with an int.)");
+  };
+
+  /* printf */
+  function fixed(x, p) {
+    var neg = x < 0 || (x === 0 && 1 / x < 0), a = Math.abs(x);
+    if (a >= 1e21) { var big = BigInt(Math.trunc(a)).toString(); return (neg ? "-" : "") + big + (p > 0 ? "." + new Array(p + 1).join("0") : ""); }
+    p = Math.min(p, 100);
+    var s = a.toFixed(p), ext = a.toFixed(Math.min(100, p + 30)), dot = ext.indexOf("."), tail = ext.slice(dot + 1 + p);
+    if (/^50*$/.test(tail)) {
+      var trunc = p === 0 ? ext.slice(0, dot) : ext.slice(0, dot + 1 + p);
+      var last = trunc.replace(".", "").slice(-1);
+      if ((+last) % 2 === 0) s = trunc;
+    }
+    return (neg ? "-" : "") + s;
+  }
+  function expStr(x, p, upper) {
+    var s = Math.abs(x).toExponential(Math.min(p, 100)), m = /^(.*)e([+-])(\d+)$/.exec(s), ex = m[3].length < 2 ? "0" + m[3] : m[3];
+    var r = (x < 0 || (x === 0 && 1 / x < 0) ? "-" : "") + m[1] + "e" + m[2] + ex;
+    return upper ? r.toUpperCase() : r;
+  }
+  function genStr(x, p, alt, upper) {
+    if (p === 0) p = 1;
+    if (x === 0) { var z = alt ? "0." + new Array(p).join("0") : "0"; return (1 / x < 0 ? "-" : "") + z; }
+    var e = parseInt(Math.abs(x).toExponential(p - 1).split("e")[1], 10), s;
+    if (e < -4 || e >= p) {
+      s = expStr(x, p - 1, upper);
+      if (!alt) s = s.replace(/\.?0+(e|E)/, "$1");
+    } else {
+      s = fixed(x, p - 1 - e);
+      if (!alt && s.indexOf(".") > -1) s = s.replace(/\.?0+$/, "");
+    }
+    return s;
+  }
+  function pad(s, width, flags, numeric, signLen) {
+    if (s.length >= width) return s;
+    var n = width - s.length;
+    if (flags.minus) return s + new Array(n + 1).join(" ");
+    if (flags.zero && numeric) return s.slice(0, signLen) + new Array(n + 1).join("0") + s.slice(signLen);
+    return new Array(n + 1).join(" ") + s;
+  }
+  var TYPE_DESC = { "int": "int", "uint": "unsigned int", "long": "long int", "ulong": "long unsigned int", "char": "int", "uchar": "int", "short": "int", "ushort": "int", "float": "double", "double": "double", "str": "char *", "arr": "char *" };
+  R.formatPrintf = function (fmt, vals, node) {
+    var out = "", ai = 0, self = this, line = node.line;
+    for (var i = 0; i < fmt.length; i++) {
+      var ch = fmt[i];
+      if (ch !== "%") { out += ch; continue; }
+      i++;
+      if (i >= fmt.length) { out += "%"; break; }
+      if (fmt[i] === "%") { out += "%"; continue; }
+      var flags = { minus: false, plus: false, space: false, zero: false, alt: false };
+      for (;; i++) { var f = fmt[i]; if (f === "-") flags.minus = true; else if (f === "+") flags.plus = true; else if (f === " ") flags.space = true; else if (f === "0") flags.zero = true; else if (f === "#") flags.alt = true; else break; }
+      var width = 0, prec = -1;
+      if (fmt[i] === "*") { var wv = vals[ai++]; width = wv ? wv.v | 0 : 0; if (width < 0) { flags.minus = true; width = -width; } i++; }
+      else { var w = ""; while (fmt[i] >= "0" && fmt[i] <= "9") w += fmt[i++]; if (w) width = +w; }
+      if (fmt[i] === ".") { i++; if (fmt[i] === "*") { var pv = vals[ai++]; prec = pv ? pv.v | 0 : 0; i++; } else { var p = ""; while (fmt[i] >= "0" && fmt[i] <= "9") p += fmt[i++]; prec = p ? +p : 0; } }
+      var len = ""; while (i < fmt.length && "hlzjtL".indexOf(fmt[i]) > -1) len += fmt[i++];
+      var conv = fmt[i], argNo = ai + 2, a;
+      if (conv === undefined) { out += "%"; break; }
+      if ("diuxXocsfFeEgGp".indexOf(conv) < 0) { self.warn("unknown conversion type character '" + conv + "' in format", line, node.col); out += "%" + conv; continue; }
+      a = vals[ai++];
+      if (!a) { self.warn("format '%" + len + conv + "' expects a matching argument, but there are too few arguments", line, node.col); a = { t: (conv === "s" ? "str" : "int"), v: conv === "s" ? "(null)" : 0 }; }
+      var body, sign = "", numeric = true, isIntConv = "diuxXoc".indexOf(conv) > -1;
+      if (isIntConv && (a.t === "float" || a.t === "double")) {
+        self.warn("format '%" + len + conv + "' expects argument of type '" + (len === "l" ? "long int" : "int") + "', but argument " + argNo + " has type 'double'", line, node.col);
+        a = { t: "int", v: 0 };
+      } else if ("fFeEgG".indexOf(conv) > -1 && !(a.t === "float" || a.t === "double")) {
+        self.warn("format '%" + conv + "' expects argument of type 'double', but argument " + argNo + " has type '" + (TYPE_DESC[a.t] || "int") + "'", line, node.col);
+        a = { t: "double", v: 0 };
+      } else if (conv === "s" && a.t !== "str" && a.t !== "arr") {
+        self.warn("format '%s' expects argument of type 'char *', but argument " + argNo + " has type '" + (TYPE_DESC[a.t] || "int") + "'", line, node.col);
+      } else if ((a.t === "str" || a.t === "arr") && conv !== "s" && conv !== "p") {
+        self.warn("format '%" + conv + "' expects a number, but argument " + argNo + " is text", line, node.col);
+        a = { t: "int", v: 0 };
+      }
+      switch (conv) {
+        case "d": case "i": {
+          var dv = (len === "l" || len === "ll" || len === "z" || len === "j" || len === "t") ? a.v : (len === "hh" ? (a.v << 24) >> 24 : len === "h" ? (a.v << 16) >> 16 : a.v | 0);
+          if (a.t === "ulong" && dv >= 9223372036854775808) dv -= 18446744073709551616;
+          var neg = dv < 0, digits = Math.abs(dv) >= 1e21 ? BigInt(Math.abs(dv)).toString() : String(Math.abs(dv));
+          if (prec >= 0) { while (digits.length < prec) digits = "0" + digits; if (prec === 0 && dv === 0) digits = ""; flags.zero = false; }
+          sign = neg ? "-" : flags.plus ? "+" : flags.space ? " " : "";
+          body = sign + digits; out += pad(body, width, flags, true, sign.length); break;
+        }
+        case "u": case "x": case "X": case "o": {
+          var big = (len === "l" || len === "ll" || len === "z" || len === "j" || len === "t");
+          var uv = big ? (a.v < 0 ? BigInt.asUintN(64, BigInt(Math.trunc(a.v))) : BigInt(Math.trunc(a.v))) : BigInt(a.v >>> 0);
+          if (len === "hh") uv = BigInt(a.v & 255); else if (len === "h") uv = BigInt(a.v & 65535);
+          var ds = uv.toString(conv === "u" ? 10 : conv === "o" ? 8 : 16);
+          if (conv === "X") ds = ds.toUpperCase();
+          if (prec >= 0) { while (ds.length < prec) ds = "0" + ds; flags.zero = false; }
+          var pre = flags.alt && uv !== 0n ? (conv === "x" ? "0x" : conv === "X" ? "0X" : conv === "o" ? "0" : "") : "";
+          out += pad(pre + ds, width, flags, true, pre.length); break;
+        }
+        case "c": out += pad(String.fromCharCode(a.v & 255), width, flags, false, 0); break;
+        case "s": {
+          var sv = self.strOf(a); if (prec >= 0) sv = sv.slice(0, prec);
+          out += pad(sv, width, flags, false, 0); break;
+        }
+        case "f": case "F": case "e": case "E": case "g": case "G": {
+          var xv = a.v, p2 = prec < 0 ? 6 : prec;
+          if (!isFinite(xv)) {
+            body = isNaN(xv) ? "nan" : (xv < 0 ? "-inf" : "inf");
+            if (conv === "F" || conv === "E" || conv === "G") body = body.toUpperCase();
+            if (xv > 0 && flags.plus) body = "+" + body;
+            var fl2 = { minus: flags.minus, zero: false }; out += pad(body, width, fl2, false, 0); break;
+          }
+          if (conv === "f" || conv === "F") body = fixed(xv, p2);
+          else if (conv === "e" || conv === "E") body = expStr(xv, p2, conv === "E");
+          else body = genStr(xv, p2, flags.alt, conv === "G");
+          if (flags.alt && p2 === 0 && (conv === "f" || conv === "F") && body.indexOf(".") < 0) body += ".";
+          sign = body[0] === "-" ? "-" : flags.plus ? "+" : flags.space ? " " : "";
+          if (body[0] !== "-") body = sign + body;
+          out += pad(body, width, flags, true, sign.length); break;
+        }
+        case "p": out += pad("0x0", width, flags, false, 0); break;
+      }
+    }
+    return out;
+  };
+
+  /* scanf and input */
+  R.peekc = function () {
+    if (this.pos >= this.buf.length) { if (this.eof) return null; throw new NeedInput(); }
+    var ls = this.lineStarts, li = -1;
+    for (var i = ls.length - 1; i >= 0; i--) if (this.pos >= ls[i]) { li = i; break; }
+    if (li >= 0 && !this.markedLines[li]) { this.markedLines[li] = true; this.marks.push({ at: this.out.length, line: li }); }
+    return this.buf[this.pos];
+  };
+  function isWs(c) { return c === " " || c === "\n" || c === "\t" || c === "\r" || c === "\f" || c === "\v"; }
+  R.scanf = function (n, env) {
+    var args = n.args;
+    if (!args.length) throw new RunError("scanf needs a format string");
+    var fmtv = this.ev(args[0], env), fmt = this.strOf(fmtv), ai = 1, count = 0, assigned = 0;
+    var self = this, failed = false;
+    for (var i = 0; i < fmt.length && !failed; i++) {
+      var ch = fmt[i];
+      if (isWs(ch)) { var c0; while ((c0 = this.peekcSoft()) !== null && isWs(c0)) this.pos++; continue; }
+      if (ch !== "%") {
+        var cc = this.peekc();
+        if (cc === null) { if (count === 0 && assigned === 0) return { t: "int", v: -1 }; break; }
+        if (cc === ch) { this.pos++; continue; }
+        break;
+      }
+      i++;
+      var skip = false; if (fmt[i] === "*") { skip = true; i++; }
+      var w = ""; while (fmt[i] >= "0" && fmt[i] <= "9") w += fmt[i++];
+      var width = w ? +w : Infinity, len = ""; while (i < fmt.length && "hlLzjt".indexOf(fmt[i]) > -1) len += fmt[i++];
+      var conv = fmt[i];
+      if (conv === "%") { var pc = this.peekc(); if (pc === "%") { this.pos++; continue; } break; }
+      var target = null;
+      if (!skip) {
+        var an = args[ai++];
+        if (!an) throw new RunError("scanf: too few arguments for the format");
+        target = this.scanTarget(an, env);
+      }
+      var tok = "", c;
+      if (conv === "c") {
+        c = this.peekc(); if (c === null) { if (assigned === 0 && count === 0) return { t: "int", v: -1 }; break; }
+        this.pos++;
+        if (target) { this.storeScan(target, c.charCodeAt(0), "char"); assigned++; }
+        count++; continue;
+      }
+      while ((c = this.peekc()) !== null && isWs(c)) this.pos++;
+      if (c === null) { if (assigned === 0) return { t: "int", v: -1 }; break; }
+      if (conv === "s") {
+        while ((c = this.peekcOrNull()) !== null && !isWs(c) && tok.length < width) { tok += c; this.pos++; }
+        if (target) { this.storeStr(target, tok); assigned++; }
+        count++; continue;
+      }
+      var re = null;
+      if (conv === "d" || conv === "i") re = /^[+-]?\d+/;
+      else if (conv === "u") re = /^\d+/;
+      else if (conv === "x" || conv === "X") re = /^[0-9a-fA-F]+/;
+      else if (conv === "f" || conv === "e" || conv === "g" || conv === "E" || conv === "G") re = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?/;
+      else throw new RunError("scanf: unsupported conversion %" + conv);
+      // gather the maximal run of characters that could belong to the number
+      var look = "";
+      for (var k = this.pos; k < this.buf.length && !isWs(this.buf[k]) && look.length < width; k++) look += this.buf[k];
+      if (look.length === 0) break;
+      var m = re.exec(look);
+      if (!m) { failed = true; break; }
+      this.peekc(); this.pos += m[0].length;
+      var num = (conv === "x" || conv === "X") ? parseInt(m[0], 16) : (conv === "d" || conv === "u" || conv === "i") ? parseInt(m[0], 10) : parseFloat(m[0]);
+      if (target) {
+        var tt = target.kind === "var" ? target.v.t : target.v.et;
+        if ((conv === "f" || conv === "e" || conv === "g") && !isFloat(tt)) this.warn("format '%" + len + conv + "' expects a pointer to a floating-point variable", n.line, n.col);
+        if ((conv === "d" || conv === "i" || conv === "u") && isFloat(tt)) this.warn("format '%d' expects a pointer to an int, but the variable is a float or double", n.line, n.col);
+        this.storeScan(target, num, (conv === "f" || conv === "e" || conv === "g") ? (len === "l" || tt === "double" ? "double" : "float") : "long");
+        assigned++;
+      }
+      count++;
+    }
+    return { t: "int", v: assigned };
+  };
+  R.peekcSoft = function () { if (this.pos >= this.buf.length) return null; return this.peekc(); };
+  R.peekcOrNull = function () { if (this.pos >= this.buf.length) { if (this.eof) return null; throw new NeedInput(); } return this.peekc(); };
+  R.scanTarget = function (an, env) {
+    if (an.k === "id") {
+      var v = this.lookup(env, an.name);
+      if (!v) throw new RunError("'" + an.name + "' is not declared");
+      if (v.arr) return { kind: "arr", v: v };
+      throw new RunError("Segmentation fault (core dumped)\n(scanf needs the address of the variable. Write &" + an.name + " instead of " + an.name + ".)");
+    }
+    if (an.k === "un" || an.k === "addr") { /* not produced */ }
+    if (an.k === "addrof") return this.target(an.e, env);
+    throw new RunError("scanf arguments must look like &variable");
+  };
+  R.storeScan = function (t, num, kind) {
+    var ty = t.kind === "var" ? t.v.t : t.v.et;
+    var val = cvt(num, kind === "double" || kind === "float" ? "double" : "long", ty);
+    if (kind === "float" && ty === "float") val = Math.fround(num);
+    this.setT(t, val);
+  };
+  R.storeStr = function (t, s) {
+    if (t.kind !== "arr") throw new RunError("scanf %s needs a char array");
+    if (s.length + 1 > t.v.data.length) throw new RunError("Buffer overflow: the text is longer than the array '" + t.v.name + "' (size " + t.v.data.length + "). In C this is undefined behaviour.");
+    for (var i = 0; i < s.length; i++) t.v.data[i] = s.charCodeAt(i);
+    t.v.data[s.length] = 0;
+  };
+
+  /* ------------------------------------------------------- static analysis */
+  var BUILTIN_ARITY = { printf: [1, 99], scanf: [1, 99], puts: [1, 1], putchar: [1, 1], getchar: [0, 0], exit: [1, 1], strlen: [1, 1], abs: [1, 1],
+    sqrt: [1, 1], fabs: [1, 1], floor: [1, 1], ceil: [1, 1], round: [1, 1], trunc: [1, 1], sin: [1, 1], cos: [1, 1], tan: [1, 1], log: [1, 1], log10: [1, 1], exp: [1, 1], cbrt: [1, 1],
+    pow: [2, 2], fmod: [2, 2], hypot: [2, 2] };
+
+  function analyze(items, includes, diags) {
+    var funcs = {}, scopes = [Object.create(null)], reported = {}, curFn = null, loopDepth = 0, switchDepth = 0;
+    items.forEach(function (it) { if (it.k === "func") { if (!funcs[it.name] || it.body) funcs[it.name] = { arity: it.params.length, ret: it.ret, defined: !!it.body, declared: false, line: it.line }; } });
+    function err(msg, n) { diags.push({ level: "error", line: n.line, col: n.col || 0, msg: msg, fn: curFn }); }
+    function wrn(msg, n) { diags.push({ level: "warning", line: n.line, col: n.col || 0, msg: msg, fn: curFn }); }
+    function find(name) { for (var i = scopes.length - 1; i >= 0; i--) if (scopes[i][name]) return scopes[i][name]; return null; }
+    function expr(n) {
+      if (!n) return;
+      switch (n.k) {
+        case "id": if (!find(n.name)) { if (funcs[n.name] || BUILTIN_ARITY[n.name]) { err("'" + n.name + "' is a function, so you need () to call it", n); } else if (!reported[curFn + ":" + n.name]) { reported[curFn + ":" + n.name] = 1; err("'" + n.name + "' undeclared (first use in this function)", n); } } break;
+        case "idx": { var v = find(n.name); if (!v) { if (!reported[curFn + ":" + n.name]) { reported[curFn + ":" + n.name] = 1; err("'" + n.name + "' undeclared (first use in this function)", n); } } else if (!v.arr) err("subscripted value is neither array nor pointer nor vector", n); n.idx.forEach(expr); break; }
+        case "un": case "cast": expr(n.e); break;
+        case "bin": case "logic": case "comma": expr(n.l); expr(n.r); break;
+        case "cond": expr(n.c); expr(n.a); expr(n.b); break;
+        case "assign": {
+          expr(n.l); expr(n.r);
+          if (n.l.k === "id") { var lv = find(n.l.name); if (lv && lv.cons && !lv.arr) err("assignment of read-only variable '" + n.l.name + "'", n); else if (lv && lv.arr) err("assignment to expression with array type", n); }
+          if (n.l.k === "idx") { var av = find(n.l.name); if (av && av.cons) err("assignment of read-only location '" + n.l.name + "[...]'", n); }
+          break;
+        }
+        case "incdec": expr(n.e); if (n.e.k === "id") { var iv = find(n.e.name); if (iv && iv.cons) err((n.op === "++" ? "increment" : "decrement") + " of read-only variable '" + n.e.name + "'", n); } break;
+        case "sizeof": if (n.e) expr(n.e); break;
+        case "call": call(n); break;
+      }
+    }
+    function call(n) {
+      var uf = funcs[n.name], bi = BUILTIN_ARITY[n.name];
+      if (find(n.name)) { err("called object '" + n.name + "' is not a function or function pointer", n); n.args.forEach(expr); return; }
+      if (uf) {
+        if (n.args.length < uf.arity) err("too few arguments to function '" + n.name + "'", n);
+        else if (n.args.length > uf.arity) err("too many arguments to function '" + n.name + "'", n);
+        if (!uf.declared) wrn("implicit declaration of function '" + n.name + "' (write the function above main, or add a prototype)", n);
+      } else if (bi) {
+        var hdr = HEADERS[n.name];
+        if (hdr && !includes[hdr]) wrn("implicit declaration of function '" + n.name + "'. Add #include <" + hdr + "> at the top", n);
+        if (n.args.length < bi[0]) err("too few arguments to function '" + n.name + "'", n);
+        else if (n.args.length > bi[1]) err("too many arguments to function '" + n.name + "'", n);
+      } else err("implicit declaration of function '" + n.name + "'", n);
+      if (n.name === "scanf") {
+        // rewrite &x arguments is done by the parser-free pass below
+        n.args.forEach(function (a, i) {
+          if (i === 0) { expr(a); return; }
+          if (a.k === "id") { var v = find(a.name); if (v && !v.arr) wrn("format expects a pointer. Write &" + a.name + " instead of " + a.name, a); }
+          expr(a.k === "addrof" ? a.e : a);
+        });
+        return;
+      }
+      n.args.forEach(expr);
+    }
+    function decl(n) {
+      n.decls.forEach(function (d) {
+        d.dims.forEach(function (x) { if (x) expr(x); });
+        if (d.init) (function w(i) { if (i.k === "initlist") i.items.forEach(w); else expr(i); })(d.init);
+        var sc = scopes[scopes.length - 1];
+        if (sc[d.name]) err("redefinition of '" + d.name + "'", d);
+        else sc[d.name] = { cons: d.cons, arr: d.dims.length > 0 };
+      });
+    }
+    function stmt(n) {
+      switch (n.k) {
+        case "expr": expr(n.e); break;
+        case "decl": decl(n); break;
+        case "block": scopes.push(Object.create(null)); n.stmts.forEach(stmt); scopes.pop(); break;
+        case "if": expr(n.c); stmt(n.th); if (n.el) stmt(n.el); break;
+        case "while": case "dowhile": expr(n.c); loopDepth++; stmt(n.body); loopDepth--; break;
+        case "for": scopes.push(Object.create(null)); if (n.init) stmt(n.init); expr(n.c); expr(n.step); loopDepth++; stmt(n.body); loopDepth--; scopes.pop(); break;
+        case "switch": expr(n.e); switchDepth++; scopes.push(Object.create(null)); n.cases.forEach(function (c) { if (c.val) expr(c.val); c.stmts.forEach(stmt); }); scopes.pop(); switchDepth--; break;
+        case "break": if (!loopDepth && !switchDepth) err("break statement not within loop or switch", n); break;
+        case "continue": if (!loopDepth) err("continue statement not within a loop", n); break;
+        case "return": expr(n.e); break;
+      }
+    }
+    items.forEach(function (it) {
+      if (it.k === "decl") { it.decls.forEach(function (d) { d.global = true; }); decl(it); }
+      else if (it.k === "func") {
+        var f = funcs[it.name];
+        if (it.body) {
+          curFn = it.name; scopes.push(Object.create(null));
+          it.params.forEach(function (p) { scopes[scopes.length - 1][p.name] = { cons: p.cons, arr: p.dims > 0 }; });
+          f.declared = true; stmt(it.body);
+          scopes.pop(); curFn = null;
+        } else f.declared = true;
+      }
+    });
+    if (!funcs.main || !funcs.main.defined) diags.push({ level: "error", line: 0, col: 0, msg: "undefined reference to `main'", fn: null, nosrc: true });
+  }
+
+  // turn scanf(&x) arguments into addrof nodes; the parser rejects '&', so handle it by pre-scan of tokens
+  function allowScanfAmpersands(toks) {
+    // mark '&' tokens that directly follow '(' or ',' inside a scanf(...) call so the parser accepts them
+    for (var i = 0; i < toks.length; i++) {
+      if (toks[i].t === "id" && toks[i].v === "scanf" && toks[i + 1] && toks[i + 1].v === "(") {
+        var depth = 0;
+        for (var j = i + 1; j < toks.length; j++) {
+          var t = toks[j];
+          if (t.t === "op" && t.v === "(") depth++;
+          else if (t.t === "op" && t.v === ")") { depth--; if (depth === 0) break; }
+          else if (t.t === "op" && t.v === "&" && depth === 1) {
+            var pv = toks[j - 1];
+            if (pv.t === "op" && (pv.v === "," || pv.v === "(")) t.scanAmp = true;
+          }
+        }
+      }
+    }
+  }
+
+  /* -------------------------------------------------------------- front door */
+  function run(src, inputLines, opts) {
+    opts = opts || {};
+    var t0 = Date.now(), diags = [], ctx = { macros: Object.create(null), includes: Object.create(null) };
+    var result = { status: "ok", out: "", marks: [], diags: diags, exit: 0, ms: 0, error: null };
+    var items;
+    try {
+      var toks = lex(src, ctx);
+      allowScanfAmpersands(toks);
+      var parser = new Parser(toks, diags);
+      // let the parser accept scanf-only '&'
+      var origUnary = parser.unary;
+      parser.unary = function () {
+        var k = this.peek();
+        if (k.t === "op" && k.v === "&" && k.scanAmp) { this.next(); var e = origUnary.call(this); return { k: "addrof", e: e, line: k.line, col: k.col }; }
+        return origUnary.call(this);
+      };
+      items = parser.program();
+      if (!diags.some(function (d) { return d.level === "error"; })) analyze(items, ctx.includes, diags);
+    } catch (e) {
+      if (e instanceof CError) { diags.push({ level: "error", line: e.line, col: e.col, msg: e.msg, fn: null, unsupported: !!e.extra.unsupported }); }
+      else throw e;
+    }
+    if (diags.some(function (d) { return d.level === "error"; })) { result.status = "compile_error"; result.ms = Date.now() - t0; return result; }
+
+    var lines = inputLines || [], buf = "", starts = [];
+    lines.forEach(function (l) { starts.push(buf.length); buf += l + "\n"; });
+    var S = new Run(items, { buf: buf, lineStarts: starts, eof: !!opts.eof, maxMs: opts.maxMs }, ctx.includes);
+    try {
+      items.forEach(function (it) { if (it.k === "func") { if (!S.funcs[it.name] || it.body) S.funcs[it.name] = it; } });
+      items.forEach(function (it) { if (it.k === "decl") it.decls.forEach(function (d) { d.global = true; S.declare(S.globals, d); }); });
+      var main = S.funcs.main;
+      var r = S.ex(main.body, S.globals);
+      result.exit = r && r.c === "ret" && r.v ? (r.v.v | 0) & 255 : 0;
+    } catch (e) {
+      if (e instanceof NeedInput) result.status = "needinput";
+      else if (e instanceof ExitSignal) result.exit = e.code & 255;
+      else if (e instanceof RunError) { result.status = "runtime_error"; result.error = e.msg; }
+      else if (e && e.timeout) { result.status = "timeout"; }
+      else if (e instanceof RangeError) { result.status = "runtime_error"; result.error = "Segmentation fault (core dumped)\n(The program used too much memory or called itself too deeply.)"; }
+      else throw e;
+    }
+    result.out = S.out; result.marks = S.marks;
+    S.warns.forEach(function (w) { diags.push(w); });
+    result.ms = Date.now() - t0;
+    return result;
+  }
+
+  return { run: run };
+})();
+
+</script>
+<script>
+(function () {
+  "use strict";
+  var slug = function (s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
+  var Q = QUESTIONS.map(function (q, i) { q.id = i + 1; q.key = q.topic + "-" + slug(q.title); return q; });
+  var T = {}; TOPICS.forEach(function (t, i) { t.tint = (i % 5) + 1; T[t.id] = t; });
+  var LEVEL = { easy: "Easy", medium: "Medium", challenge: "Challenge" };
+  var KIND = { code: "Write code", predict: "Predict output" };
+  var XP = { easy: 10, medium: 20, challenge: 40 };
+  var GLYPH = { vc: "int x", kw: "if", cp: "gcc", "in": ";", ar: "%", tc: "(float)", op: "( )", rl: "==", lg: "&&", as: "+=", ct: "?:" };
+  var BLURB = {
+    vc: "Declare, store and print values, and lock some with const.", kw: "Learn which words C keeps for itself.", cp: "Follow your code from source file to program.",
+    "in": "Declarations, arithmetic and control, and what each one does.", ar: "Division, remainders and digit tricks.", tc: "When C changes types for you, and when it should not.",
+    op: "Which operator goes first, and why brackets help.", rl: "Compare values and get 1 or 0.", lg: "AND, OR, NOT and short-circuit rules.",
+    as: "Shorthand updates like += and chained assignment.", ct: "A first taste of if and else, using your new operators."
+  };
+  var maxXp = Q.reduce(function (s, q) { return s + XP[q.level]; }, 0);
+  var RANKS = [["Beginner", 0], ["Coder", 0.15], ["Problem solver", 0.35], ["Debugger", 0.6], ["C wizard", 0.85]];
+
+  /* ---------- storage (falls back to memory when the browser blocks it) ---------- */
+  var mem = {};
+  function load(k, d) { try { var v = localStorage.getItem(k); if (v !== null) return JSON.parse(v); } catch (e) {} return (k in mem) ? mem[k] : d; }
+  function save(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} scheduleSync(); }
+  var notes = load("cpl:notes", {});
+  var PRESETS = [
+    { id: "warm", name: "Warm dark", c: { bg: "#1f1e1d", fg: "#eceae2", kw: "#e68f6f", ty: "#5fc4b8", fn: "#8cb8f0", id: "#e8e4d8", str: "#8fcb9b", fmt: "#5ad1e6", num: "#e3b863", pre: "#cba7dc", cm: "#8d897e", op: "#e6b8a2", pn: "#a39f93", gut: "#77736a", caret: "#d97757" } },
+    { id: "mono", name: "Monokai", c: { bg: "#272822", fg: "#f8f8f2", kw: "#f92672", ty: "#66d9ef", fn: "#a6e22e", id: "#f8f8f2", str: "#e6db74", fmt: "#ae81ff", num: "#ae81ff", pre: "#fd971f", cm: "#75715e", op: "#f92672", pn: "#f8f8f2", gut: "#75715e", caret: "#f8f8f0" } },
+    { id: "ocean", name: "Ocean", c: { bg: "#0f1b2a", fg: "#d6e2f0", kw: "#c792ea", ty: "#ffcb6b", fn: "#82aaff", id: "#d6e2f0", str: "#c3e88d", fmt: "#89ddff", num: "#f78c6c", pre: "#ff5370", cm: "#546e7a", op: "#89ddff", pn: "#8fa3b8", gut: "#4b6178", caret: "#ffcc00" } },
+    { id: "paper", name: "Paper light", c: { bg: "#fbfaf6", fg: "#2b2a28", kw: "#b0452a", ty: "#0b6a95", fn: "#6a3fa0", id: "#2b2a28", str: "#2c7447", fmt: "#0b7f8a", num: "#8a5a00", pre: "#76508a", cm: "#8a857a", op: "#8c5a3c", pn: "#6b675e", gut: "#aaa595", caret: "#c4613f" } },
+    { id: "hc", name: "High contrast", c: { bg: "#000000", fg: "#ffffff", kw: "#ff7b72", ty: "#79c0ff", fn: "#d2a8ff", id: "#ffffff", str: "#a5d6a7", fmt: "#ffd33d", num: "#ffab70", pre: "#ff9bce", cm: "#9aa4b2", op: "#ff7b72", pn: "#ffffff", gut: "#8b949e", caret: "#ffffff" } }
+  ];
+  var PICKS = [["bg", "Background"], ["fg", "Plain text"], ["kw", "Keywords (if, for, return)"], ["ty", "Types (int, float, char)"], ["fn", "Functions (main, printf)"], ["id", "Variable names"], ["str", "Text in quotes"], ["fmt", "%d and \\n inside quotes"], ["num", "Numbers"], ["pre", "#include lines"], ["cm", "Comments"], ["op", "Operators (= + == &&)"], ["pn", "Brackets and ; ,"], ["gut", "Line numbers"], ["caret", "Cursor"]];
+  var theme = load("cpl:theme", { t: 0, p: "warm", c: {}, fs: 13.5 });
+  function preset(id) { return PRESETS.filter(function (x) { return x.id === id; })[0] || PRESETS[0]; }
+  function themeColors() { var o = {}, b = preset(theme.p).c; Object.keys(b).forEach(function (k) { o[k] = (theme.c && theme.c[k]) || b[k]; }); return o; }
+  function hex2rgb(h) { h = String(h).replace("#", ""); if (h.length === 3) h = h.replace(/./g, "$&$&"); var n = parseInt(h, 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function mix(a, b, t) { var x = hex2rgb(a), y = hex2rgb(b); return "rgb(" + [0, 1, 2].map(function (i) { return Math.round(x[i] + (y[i] - x[i]) * t); }).join(",") + ")"; }
+  function applyTheme() {
+    var c = themeColors(), st = document.documentElement.style, k;
+    for (k in c) st.setProperty("--e-" + k, c[k]);
+    st.setProperty("--e-gutc", c.gut); st.setProperty("--e-caret", c.caret);
+    st.setProperty("--e-dim", mix(c.fg, c.bg, 0.45)); st.setProperty("--e-line", mix(c.bg, c.fg, 0.14)); st.setProperty("--e-hover", mix(c.bg, c.fg, 0.12));
+    st.setProperty("--e-fs", (theme.fs || 13.5) + "px");
+  }
+  applyTheme();
+  var done = load("cpl:done", {}), drafts = load("cpl:drafts", {}), days = load("cpl:days", []), last = load("cpl:last", 0);
+  Object.keys(drafts).forEach(function (k) { if (typeof drafts[k] === "string") drafts[k] = { t: 0, v: drafts[k] }; });
+  var view = { level: "all", kind: "all" };
+  var sync = { ref: null, timer: null, state: "local" };
+  function scheduleSync() { if (!sync.ref) return; clearTimeout(sync.timer); sync.timer = setTimeout(pushState, 1500); }
+  function pushState() {
+    if (!sync.ref) return;
+    var dr = {}; Object.keys(drafts).forEach(function (k) { var d = drafts[k]; if (d && (d.v === null || (typeof d.v === "string" && d.v.length < 20000))) dr[k] = d; });
+    var nt = {}; Object.keys(notes).forEach(function (k) { var n = notes[k]; if (n && typeof n.v === "string" && n.v.length < 20000) nt[k] = n; });
+    sync.ref.set({ v: 1, done: done, days: days.slice(-120), last: last, drafts: dr, notes: nt, theme: theme, t: Date.now() }).then(function () { sync.state = "cloud"; renderStats(); }, function () { sync.state = "local"; renderStats(); });
+  }
+  function mergeRemote(r) {
+    var changed = false;
+    if (!r) return false;
+    Object.keys(r.done || {}).forEach(function (k) { if (!done[k]) { done[k] = 1; changed = true; } });
+    (r.days || []).forEach(function (d) { if (days.indexOf(d) < 0) { days.push(d); changed = true; } });
+    Object.keys(r.drafts || {}).forEach(function (k) { var rd = r.drafts[k], ld = drafts[k]; if (rd && (!ld || (rd.t || 0) > (ld.t || 0))) { drafts[k] = rd; changed = true; } });
+    Object.keys(r.notes || {}).forEach(function (k) { var rn = r.notes[k], ln = notes[k]; if (rn && (!ln || (rn.t || 0) > (ln.t || 0))) { notes[k] = rn; changed = true; } });
+    if (r.theme && (r.theme.t || 0) > (theme.t || 0)) { theme = r.theme; applyTheme(); changed = true; }
+    if (!last && r.last) { last = r.last; changed = true; }
+    return changed;
+  }
+  function initCloud() {
+    try {
+      if (!(window.claude && window.claude.use)) return;
+      var timeout = new Promise(function (res) { setTimeout(function () { res(null); }, 10000); });
+      Promise.race([Promise.all([window.claude.use("db"), window.claude.use("user")]), timeout]).then(function (a) {
+        if (!a || !a[0] || !a[1]) return;
+        return a[1].id().then(function (id) {
+          if (!id) return;
+          var ref = a[0].doc("data/users/" + id + "/cpl_state");
+          return ref.get().then(function (snap) {
+            sync.ref = ref;
+            var changed = snap.exists ? mergeRemote(snap.data()) : false;
+            if (changed) { try { localStorage.setItem("cpl:done", JSON.stringify(done)); localStorage.setItem("cpl:drafts", JSON.stringify(drafts)); localStorage.setItem("cpl:days", JSON.stringify(days)); localStorage.setItem("cpl:last", JSON.stringify(last)); localStorage.setItem("cpl:notes", JSON.stringify(notes)); localStorage.setItem("cpl:theme", JSON.stringify(theme)); } catch (e) {} refreshView(); }
+            pushState();
+          });
+        });
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  function refreshView() {
+    var h = location.hash;
+    if (/^#q-\d+$/.test(h)) { renderStats(); var q = Q[+h.slice(3) - 1]; if (q) renderDone(q); }
+    else { var y = window.scrollY; route(); window.scrollTo(0, y); }
+  }
+  var ui = {};
+  function U(q) { return ui[q.key] || (ui[q.key] = { hints: 0, walk: 0, caseIx: 0, pasted: "", answer: "", passed: {}, result: null, revealed: false }); }
+
+  /* ---------- helpers ---------- */
+  var esc = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); };
+  var fmt = function (s) { return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\n/g, "<br>"); };
+  var $ = function (id) { return document.getElementById(id); };
+  var KW = new Set("auto break case char const continue default do double else enum extern float for goto if int long register return short signed sizeof static struct switch typedef union unsigned void volatile while".split(" "));
+  var TY = new Set("char double float int long short signed unsigned void".split(" "));
+  function hl(code, p) {
+    p = p || "t-"; var E = p === "e-";
+    var re = /(\/\*[\s\S]*?\*\/|\/\/[^\n]*)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(^[ \t]*#[^\n]*)|(\b0[xX][0-9a-fA-F]+\b|\b\d+(?:\.\d*)?(?:[eE][+-]?\d+)?[fFlLuU]*\b)|(\b[A-Za-z_]\w*\b)|([-+*\/%=<>!&|^~?:]+)|([;,.(){}\[\]])/gm;
+    var out = "", lastI = 0, m;
+    while ((m = re.exec(code))) {
+      out += esc(code.slice(lastI, m.index)); lastI = re.lastIndex;
+      if (m[1]) out += '<span class="' + p + 'cm">' + esc(m[1]) + "</span>";
+      else if (m[2]) out += '<span class="' + p + 'str">' + esc(m[2]).replace(/%[-+0-9.]*[a-z]+|\\[nt0\\"']/g, function (x) { return '<span class="' + p + 'fmt">' + x + "</span>"; }) + "</span>";
+      else if (m[3]) out += '<span class="' + p + 'pre">' + esc(m[3]) + "</span>";
+      else if (m[4]) out += '<span class="' + p + 'num">' + m[4] + "</span>";
+      else if (m[5]) {
+        if (E && TY.has(m[5])) out += '<span class="e-ty">' + m[5] + "</span>";
+        else if (KW.has(m[5])) out += '<span class="' + p + 'kw">' + m[5] + "</span>";
+        else if (E && /^[ \t]*\(/.test(code.slice(lastI, lastI + 8))) out += '<span class="e-fn">' + m[5] + "</span>";
+        else out += E ? '<span class="e-id">' + m[5] + "</span>" : m[5];
+      }
+      else if (m[6]) out += E ? '<span class="e-op">' + esc(m[6]) + "</span>" : esc(m[6]);
+      else out += E ? '<span class="e-pn">' + m[7] + "</span>" : m[7];
+    }
+    return out + esc(code.slice(lastI));
+  }
+  function trimBlank(s) { return s.replace(/^\n+|\n+$/g, ""); }
+  function codeBlock(code, label, copy) {
+    var bar = (label || copy) ? '<div class="code-bar"><span>' + esc(label || "") + "</span>" + (copy ? '<button class="ghost" data-act="copy" data-code="' + encodeURIComponent(code) + '">Copy</button>' : "") + "</div>" : "";
+    return '<div class="code">' + bar + "<pre><code>" + hl(code) + "</code></pre></div>";
+  }
+  function ioBox(label, text) { return '<div class="box"><div class="lab">' + esc(label) + "</div><pre>" + esc(text) + "</pre></div>"; }
+  var I = {
+    check: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4L16 6"/></svg>',
+    left: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>',
+    right: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>',
+    flame: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.6 1.5c.3 2.6-1 4-2.3 5.4C6.9 8.4 5.5 9.9 5.5 12.4A4.6 4.6 0 0010 17a4.6 4.6 0 004.5-4.6c0-1.5-.6-2.6-1.3-3.6-.2.9-.7 1.5-1.4 1.8.5-3-.3-6.3-1.2-9.1z"/></svg>',
+    star: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.8l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L10 14l-5 3 1.2-5.6L2 7.6l5.6-.6z"/></svg>',
+    bolt: '<svg viewBox="0 0 20 20" fill="currentColor"><path d="M11.5 1.5L4 11h5l-1 7.5L16 8h-5z"/></svg>',
+    bulb: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 15h5M8 17.5h4M10 2.5a5 5 0 00-3 9c.6.5 1 1.2 1 2h4c0-.8.4-1.5 1-2a5 5 0 00-3-9z"/></svg>',
+    note: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3.5h12v13H4zM7 7.5h6M7 10.5h6M7 13.5h3"/></svg>',
+    palette: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5a7.5 7.5 0 100 15c1.2 0 1.8-.8 1.5-1.8-.3-1 .3-1.9 1.4-1.9H15a2.5 2.5 0 002.5-2.5C17.5 7.1 14.2 2.5 10 2.5z"/><circle cx="6.5" cy="9" r=".6" fill="currentColor"/><circle cx="9" cy="6" r=".6" fill="currentColor"/><circle cx="12.5" cy="6.5" r=".6" fill="currentColor"/></svg>',
+    play: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 2.8v10.4L13 8z"/></svg>',
+    dice: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="14" height="14" rx="3.5"/><circle cx="7.5" cy="7.5" r="1" fill="currentColor"/><circle cx="12.5" cy="12.5" r="1" fill="currentColor"/><circle cx="12.5" cy="7.5" r="1" fill="currentColor"/><circle cx="7.5" cy="12.5" r="1" fill="currentColor"/></svg>'
+  };
+  function ring(p, size, stroke, label) {
+    var r = (size - stroke) / 2, c = 2 * Math.PI * r, h = size / 2;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + " " + size + '" role="img" aria-label="' + Math.round(p * 100) + ' percent done"><circle cx="' + h + '" cy="' + h + '" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="' + stroke + '"/><circle cx="' + h + '" cy="' + h + '" r="' + r + '" fill="none" stroke="var(--accent)" stroke-width="' + stroke + '" stroke-linecap="round" stroke-dasharray="' + (c * p) + " " + c + '" transform="rotate(-90 ' + h + " " + h + ')"/>' +
+      (label ? '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="DM Sans, sans-serif" font-weight="700" font-size="' + size * 0.24 + '" fill="var(--fg)">' + label + "</text>" : "") + "</svg>";
+  }
+  var pills = function (q) { return '<span class="pill lv-' + q.level + '">' + LEVEL[q.level] + '</span><span class="kind">' + KIND[q.kind] + "</span>"; };
+  function allCases(q) { return [{ input: q.input || "", output: q.output }].concat(q.more || []); }
+  function isDone(q) { return !!done[q.key]; }
+  function xpNow() { return Q.reduce(function (s, q) { return s + (isDone(q) ? XP[q.level] : 0); }, 0); }
+  function dayStr(d) { return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function streak() {
+    var n = 0, d = new Date();
+    if (days.indexOf(dayStr(d)) < 0) d.setDate(d.getDate() - 1);
+    while (days.indexOf(dayStr(d)) > -1) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function rankName() {
+    var f = xpNow() / maxXp, name = RANKS[0][0];
+    RANKS.forEach(function (r) { if (f >= r[1]) name = r[0]; });
+    return name;
+  }
+  function setDone(q, v, celebrate) {
+    var was = isDone(q);
+    if (v) done[q.key] = 1; else delete done[q.key];
+    save("cpl:done", done);
+    if (v && !was) { var t = dayStr(new Date()); if (days.indexOf(t) < 0) { days.push(t); save("cpl:days", days.slice(-120)); } }
+    renderStats();
+    if (v && !was && celebrate) celebrateQ(q);
+  }
+  function renderStats() {
+    $("stats").innerHTML = '<span class="stat fire" title="Days in a row you solved something">' + I.flame + streak() + " <small>day streak</small></span>" +
+      '<span class="stat xp" title="Easy 10, Medium 20, Challenge 40">' + I.bolt + xpNow() + " <small>XP</small></span>" +
+      '<span class="stat rank">' + I.star + rankName() + "</span>" +
+      '<a class="stat" href="#theme" title="Change the colours of the code editor">' + I.palette + "Colours</a>" +
+      '<span class="stat sync' + (sync.state === "cloud" ? "" : " local") + '" title="' + (sync.state === "cloud" ? "Your progress and code are saved to your account." : "Your progress and code are saved in this browser only.") + '">' + I.check + (sync.state === "cloud" ? "Saved to account" : "Saved on this device") + "</span>";
+  }
+  function celebrateQ(q) {
+    var fx = $("fx"), i = Q.indexOf(q), next = Q[i + 1], h = "", reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) {
+      var cols = ["var(--accent)", "var(--ok)", "var(--ti5)", "var(--ti3)", "var(--ti4)"];
+      h += '<div class="confetti" aria-hidden="true">';
+      for (var k = 0; k < 28; k++) {
+        var a = (Math.random() * 140 - 70) * Math.PI / 180, d = 160 + Math.random() * 260;
+        h += '<i style="background:' + cols[k % 5] + ";--x:" + Math.round(Math.sin(a) * d * 1.4) + "px;--y:" + Math.round(-Math.cos(a) * d) + "px;--r:" + Math.round(Math.random() * 720 - 360) + "deg;animation-delay:" + (Math.random() * 0.12).toFixed(2) + 's"></i>';
+      }
+      h += "</div>";
+    }
+    h += '<div class="toast"><div class="in" role="status"><span><b>Solved!</b><span class="xp">+' + XP[q.level] + " XP</span></span>" +
+      (next ? '<a class="btn" href="#q-' + next.id + '">Next question ' + I.right + "</a>" : '<a class="btn" href="#t-' + q.topic + '">Back to topic</a>') + '<button class="ghost" data-act="closetoast">Close</button></div></div>';
+    fx.innerHTML = h;
+    clearTimeout(celebrateQ.t); celebrateQ.t = setTimeout(function () { fx.innerHTML = ""; }, 6000);
+  }
+
+  /* ---------- home ---------- */
+  function resumeQ() { var l = Q[last - 1]; return (l && !isDone(l)) ? l : (Q.filter(function (q) { return !isDone(q); })[0] || Q[0]); }
+  function renderHome() {
+    var n = Q.filter(isDone).length, p = n / Q.length, rq = resumeQ(), started = n > 0 || last > 0;
+    var h = '<section class="hero"><div><span class="eyebrow">' + Q.length + " practice questions</span><h1>Learn C by <em>writing</em> it.</h1>" +
+      '<p class="lede">Solve small problems on everything you have studied so far. Stuck? Open a hint, or let the walkthrough explain one step at a time.</p>' +
+      '<div class="acts"><a class="btn primary" href="#q-' + rq.id + '">' + I.play + (started ? "Continue" : "Start the first question") + '</a><button class="btn" data-act="random">' + I.dice + "Surprise me</button></div>" +
+      '<div class="ringline">' + ring(p, 46, 6, "") + "<span><strong>" + n + " of " + Q.length + "</strong> solved" + (started ? ". Up next: " + esc(rq.title) : "") + "</span></div></div>" +
+      '<div class="term" aria-hidden="true"><div class="dots"><i></i><i></i><i></i></div><pre><span class="p">$</span> gcc main.c -o main\n<span class="p">$</span> ./main\n<span class="o">Hello, C!</span>\n<span class="p">$</span> <span class="cursor"></span></pre></div></section>';
+    h += '<div class="sect-head"><h2>Pick a topic</h2><span class="note">' + TOPICS.length + ' topics</span></div><div class="grid">';
+    TOPICS.forEach(function (t) {
+      var qs = Q.filter(function (q) { return q.topic === t.id; }), d = qs.filter(isDone).length;
+      h += '<a class="tcard" href="#t-' + t.id + '"><div class="top2"><span class="glyph t' + t.tint + '">' + esc(GLYPH[t.id]) + "</span>" + ring(d / qs.length, 44, 5, "") + "</div><h3>" + esc(t.name) + "</h3><p>" + esc(BLURB[t.id]) + "</p>" +
+        '<div class="minidots" aria-hidden="true">' + qs.map(function (q) { return '<i class="' + (isDone(q) ? "on" : "") + '"></i>'; }).join("") + '</div><div class="foot"><span><b>' + d + "</b> of " + qs.length + ' solved</span><span class="go">' + (d === qs.length ? "Review" : d ? "Continue" : "Start") + I.right + "</span></div></a>";
+    });
+    h += '</div><div class="foot-note"><span>Your progress and unfinished code are saved in this browser.</span><button class="link" data-act="reset" id="resetbtn">Reset everything</button></div>';
+    $("main").innerHTML = h;
+  }
+
+  /* ---------- topic page ---------- */
+  function renderTopic(t) {
+    var all = Q.filter(function (q) { return q.topic === t.id; }), d = all.filter(isDone).length;
+    var list = all.filter(function (q) { return (view.level === "all" || q.level === view.level) && (view.kind === "all" || q.kind === view.kind); });
+    function chipRow(label, key, opts) { return '<div class="chips"><span class="k">' + label + "</span>" + opts.map(function (o) { return '<button class="chip" data-act="filter" data-key="' + key + '" data-v="' + o[0] + '" aria-pressed="' + (view[key] === o[0]) + '">' + o[1] + "</button>"; }).join("") + "</div>"; }
+    var h = '<nav class="crumb"><a href="#home">' + I.left + "All topics</a></nav>";
+    h += '<div class="thead"><span class="glyph t' + t.tint + '">' + esc(GLYPH[t.id]) + '</span><div><span class="eyebrow">Topic</span><h1>' + esc(t.name) + '</h1><p class="note" style="margin-top:4px">' + d + " of " + all.length + ' solved</p></div><span class="ringwrap">' + ring(d / all.length, 64, 7, Math.round(100 * d / all.length) + "%") + "</span></div>";
+    h += '<section class="recapcard"><h3>Remember</h3>' + t.recap.map(function (x) { return "<p>" + fmt(x) + "</p>"; }).join("") + "</section>";
+    h += '<div class="filters">' + chipRow("Level", "level", [["all", "All"], ["easy", "Easy"], ["medium", "Medium"], ["challenge", "Challenge"]]) + chipRow("Type", "kind", [["all", "All"], ["code", "Write code"], ["predict", "Predict output"]]) + "</div>";
+    h += list.length ? '<div class="qgrid">' + list.map(function (q) {
+      return '<a class="qtile' + (isDone(q) ? " isdone" : "") + '" href="#q-' + q.id + '"><span class="num">' + (isDone(q) ? I.check : (all.indexOf(q) + 1)) + '</span><span><span class="t">' + esc(q.title) + '</span><span class="m">' + pills(q) + "</span></span></a>";
+    }).join("") + "</div>" : '<div class="empty">No questions match these filters.<br><button class="link" data-act="clearfilters">Clear filters</button></div>';
+    $("main").innerHTML = h;
+  }
+
+  /* ---------- question page ---------- */
+  function scaffold() { return "#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}\n"; }
+  function renderQuestion(q) {
+    var i = Q.indexOf(q), prev = Q[i - 1], next = Q[i + 1], t = T[q.topic], sibs = Q.filter(function (x) { return x.topic === q.topic; }), h = "";
+    last = q.id; save("cpl:last", last);
+    h += '<div class="qbar"><a class="back" href="#t-' + t.id + '">' + I.left + esc(t.name) + '</a><div class="trail" aria-label="Questions in this topic">' +
+      sibs.map(function (x) { return '<a href="#q-' + x.id + '" class="' + (x === q ? "cur" : isDone(x) ? "on" : "") + '" title="' + esc(x.title) + '" aria-label="' + esc(x.title) + '"></a>'; }).join("") + "</div>" +
+      '<div class="qnav"><span>' + (i + 1) + " / " + Q.length + "</span>" + (prev ? '<a class="btn sm" href="#q-' + prev.id + '" aria-label="Previous question">' + I.left + "</a>" : "") + (next ? '<a class="btn sm" href="#q-' + next.id + '" aria-label="Next question">' + I.right + "</a>" : "") + "</div></div>";
+    h += '<div class="qgrid2"><div class="pane-task"><div class="qtitle"><div class="pills">' + pills(q) + '<span class="pill" style="background:var(--tn5);color:var(--ti5)">+' + XP[q.level] + " XP</span></div><h1>" + esc(q.title) + "</h1></div>";
+    if (q.kind === "code") {
+      h += '<p class="task">' + fmt(q.task) + "</p>" + (q.note ? '<p class="note">' + fmt(q.note) + "</p>" : "") + '<div id="cases" class="stack"></div>';
+    } else {
+      h += '<p class="task">' + fmt(q.prompt) + "</p>" + (q.body ? codeBlock(q.body.map(function (l) { return l.replace(/^ {4}/, ""); }).join("\n"), "inside main()", false) : "") + (q.full ? codeBlock(q.full, "program.c", false) : "");
+    }
+    h += '<details class="recap"><summary>Quick recap: ' + esc(t.name) + "</summary><ul>" + t.recap.map(function (x) { return "<li>" + fmt(x) + "</li>"; }).join("") + "</ul></details></div>";
+    h += '<div class="pane-work">';
+    if (q.kind === "code") {
+      var hasInput = allCases(q).some(function (c) { return c.input; });
+      h += '<div class="win"><div class="bar"><div class="dots"><i></i><i></i><i></i></div><span class="fname">main.c</span><button class="ghost" data-act="gotheme">Colours</button><button class="ghost" data-act="copyeditor">Copy</button><button class="ghost" data-act="resetcode">Reset</button></div><div class="ed"><pre class="gut mono" id="gut" aria-hidden="true"></pre><div class="edwrap"><pre class="hlp mono" id="hlp" aria-hidden="true"></pre><textarea class="src mono" id="ed" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Your C code"></textarea></div></div></div>' +
+        '<div class="runbar"><button class="btn primary run" data-act="run">' + I.play + 'Run</button>' + (hasInput ? '<button class="btn" data-act="runex">Run with example input</button>' : "") + '<span class="note"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span></div>' + navRow(q) +
+        '<div class="termwin"><div class="bar"><div class="dots"><i></i><i></i><i></i></div><span class="fname">Terminal</span><button class="ghost" data-act="clearterm">Clear</button></div><div class="tbody" id="term" role="log" aria-live="polite"></div></div>' +
+        '<div id="result"></div><p class="note">Runs C right here. Pointers, structs and files are not supported yet.</p>';
+    } else {
+      h += '<div class="checkbox"><h3>Your answer</h3><div id="check" class="stack"></div></div>' + navRow(q);
+    }
+    h += '<button class="btn donebtn" id="donebtn" data-act="toggledone" aria-pressed="false"></button></div>';
+    h += '<div class="pane-help" id="help"></div></div>';
+    $("main").innerHTML = h;
+    if (q.kind === "code") { renderCases(q); setupEditor(q); renderTerm(q); renderResult(q); } else renderCheck(q);
+    renderHelp(q); renderNotes(q); renderDone(q);
+  }
+  function navRow(q) {
+    var i = Q.indexOf(q), prev = Q[i - 1], next = Q[i + 1];
+    return '<div class="runbar">' +
+      (prev ? '<a class="btn" href="#q-' + prev.id + '">' + I.left + "Previous</a>" : '<button class="btn" disabled>' + I.left + "Previous</button>") +
+      (next ? '<a class="btn" href="#q-' + next.id + '">Next' + I.right + "</a>" : '<button class="btn" disabled>Next' + I.right + "</button>") +
+      '<button class="btn" id="notesbtn" data-act="notes" aria-expanded="false">' + I.note + "Notes</button></div><div id=\"notes\"></div>";
+  }
+  function renderNotes(q) {
+    var el = $("notes"), u = U(q); if (!el) return;
+    var n = notes[q.key], has = !!(n && n.v && n.v.trim());
+    if (u.notesOpen === undefined) u.notesOpen = has;
+    var b = $("notesbtn"); if (b) { b.setAttribute("aria-expanded", u.notesOpen); b.classList.toggle("has", has); }
+    el.innerHTML = u.notesOpen ? '<div class="notebox"><label class="eyebrow" for="notetext">Your notes for this question</label><textarea class="plain" id="notetext" placeholder="Write anything you want to remember, like a formula, a mistake or a tip" spellcheck="true">' + esc((n && n.v) || "") + '</textarea><span class="note" id="notesaved">' + (has ? "Saved" : "Notes save automatically.") + "</span></div>" : "";
+  }
+  document.addEventListener("input", function (e) {
+    if (!e.target || e.target.id !== "notetext") return;
+    var m = /^#q-(\d+)$/.exec(location.hash), q = m && Q[+m[1] - 1]; if (!q) return;
+    notes[q.key] = { t: Date.now(), v: e.target.value }; save("cpl:notes", notes);
+    var s = $("notesaved"); if (s) s.textContent = "Saved";
+    var b = $("notesbtn"); if (b) b.classList.toggle("has", !!e.target.value.trim());
+  });
+  function renderDone(q) { var b = $("donebtn"); if (!b) return; b.setAttribute("aria-pressed", isDone(q)); b.innerHTML = isDone(q) ? I.check + "Solved. Tap to undo" : "Mark as solved myself"; }
+  function renderCases(q) {
+    var cs = allCases(q), u = U(q), c = cs[u.caseIx], h = "";
+    if (cs.length > 1) h += '<div class="tabs" role="tablist">' + cs.map(function (_, k) { return '<button class="chip" role="tab" data-act="case" data-v="' + k + '" aria-pressed="' + (k === u.caseIx) + '">Example ' + (k + 1) + (u.passed[k] ? " ✓" : "") + "</button>"; }).join("") + "</div>";
+    h += '<div class="io">' + (c.input ? ioBox("Type this input", c.input) : "") + ioBox("Expected output", c.output) + "</div>";
+    $("cases").innerHTML = h;
+  }
+  function setupEditor(q) {
+    var ed = $("ed"), gut = $("gut"), start = q.starter ? q.starter + "\n" : scaffold();
+    ed.value = (drafts[q.key] && drafts[q.key].v !== null) ? drafts[q.key].v : start;
+    var hp = $("hlp"), lh = (theme.fs || 13.5) * 1.6, rows = Math.min(26, Math.max(13, ed.value.split("\n").length + 2)); ed.style.height = (rows * lh + 28) + "px";
+    function paint() { hp.innerHTML = hl(ed.value, "e-") + "\n "; hp.scrollTop = ed.scrollTop; hp.scrollLeft = ed.scrollLeft; }
+    function nums() { var n = ed.value.split("\n").length, s = ""; for (var k = 1; k <= n; k++) s += k + "\n"; gut.textContent = s; gut.scrollTop = ed.scrollTop; }
+    nums(); paint(); ed.addEventListener("scroll", function () { gut.scrollTop = ed.scrollTop; hp.scrollTop = ed.scrollTop; hp.scrollLeft = ed.scrollLeft; });
+    var trap = true, timer;
+    ed.addEventListener("input", function () { nums(); paint(); clearTimeout(timer); timer = setTimeout(function () { drafts[q.key] = { t: Date.now(), v: ed.value }; save("cpl:drafts", drafts); }, 300); });
+    ed.addEventListener("blur", function () { trap = true; });
+    function insert(s) { ed.setRangeText(s, ed.selectionStart, ed.selectionEnd, "end"); ed.dispatchEvent(new Event("input")); }
+    ed.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { trap = false; return; }
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); startRun(q, "normal"); return; }
+      if (e.key === "Tab" && trap && !e.shiftKey) { e.preventDefault(); insert("    "); }
+      else if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        var v = ed.value, s = ed.selectionStart, ls = v.lastIndexOf("\n", s - 1) + 1, line = v.slice(ls, s), ind = line.match(/^\s*/)[0];
+        if (/\{\s*$/.test(line)) ind += "    ";
+        e.preventDefault(); insert("\n" + ind);
+      }
+    });
+  }
+
+  /* ---------- checking (lenient: spaces, capital letters and extra zeros are ignored) ---------- */
+  function normLines(s) {
+    var l = String(s).replace(/\r/g, "").split("\n").map(function (x) { return x.replace(/\s+$/, ""); });
+    while (l.length && l[l.length - 1] === "") l.pop();
+    while (l.length && l[0] === "") l.shift();
+    return l;
+  }
+  function canonNum(s) { return s.replace(/[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?/g, function (m) { var f = parseFloat(m); return isFinite(f) ? String(f) : m; }); }
+  function normText(s, q) { s = String(s).toLowerCase(); s = (q && q.ignoreNumbers) ? s.replace(/\d+/g, "#") : canonNum(s); return s.replace(/\s+/g, ""); }
+  function leniently(text, q) {
+    return String(text).replace(/\r/g, "").split("\n").map(function (l) { return { raw: l.replace(/\s+$/, ""), n: normText(l, q) }; }).filter(function (x) { return x.n; });
+  }
+  function compareOutput(q, got, exp) {
+    var a = leniently(got, q), b = leniently(exp, q);
+    if (!a.length) return { ok: false, msg: "The program printed nothing.", detail: "Use printf to show the result." };
+    var aj = a.map(function (x) { return x.n; }).join("\n"), bj = b.map(function (x) { return x.n; }).join("\n");
+    var exact = normLines(got).join("\n") === normLines(exp).join("\n");
+    if (aj === bj) return exact ? { ok: true, msg: "Matches the expected output." } : { ok: true, msg: "Matches the expected output.", detail: "Spaces, capital letters or extra zeros were different from the example. I ignored that." };
+    if (aj.length > bj.length && aj.slice(-bj.length) === bj) return { ok: true, msg: "Matches the expected output.", detail: "Your program also printed some text before the answer, such as a prompt. That is fine." };
+    var n = Math.max(a.length, b.length), i;
+    for (i = 0; i < n; i++) if (!a[i] || !b[i] || a[i].n !== b[i].n) break;
+    var d;
+    if (!a[i]) d = "Your output stops after line " + i + ". Expected line " + (i + 1) + ": " + b[i].raw;
+    else if (!b[i]) d = "Your output has an extra line " + (i + 1) + ": " + a[i].raw;
+    else d = "Line " + (i + 1) + "\nExpected: " + b[i].raw + "\nYou got:  " + a[i].raw;
+    return { ok: false, msg: "Not quite yet.", detail: d };
+  }
+  function normAns(s) { return normText(s, null); }
+
+  /* ---------- running code ---------- */
+  function exampleLines(c) { return c.input ? c.input.split("\n") : []; }
+  function startRun(q, mode) {
+    var u = U(q);
+    u.inputs = mode === "example" ? exampleLines(allCases(q)[u.caseIx]) : [];
+    u.auto = mode === "example"; u.result = null;
+    execute(q);
+  }
+  function execute(q) {
+    var u = U(q), ed = $("ed"); if (!ed) return;
+    var r = CRunner.run(ed.value, u.inputs, { eof: u.auto, maxMs: 2500 });
+    u.run = r; u.src = ed.value;
+    renderTerm(q);
+    if (r.status === "ok") autoCheck(q, r); else { u.result = null; renderResult(q); }
+    var tin = $("tin"); if (tin) tin.focus({ preventScroll: true });
+    var tb = $("term"); if (tb) tb.scrollTop = tb.scrollHeight;
+  }
+  function autoCheck(q, r) {
+    var u = U(q), cs = allCases(q), toks = function (a) { return a.join(" ").split(/\s+/).filter(Boolean).join(" "); }, typed = toks(u.inputs), idx = -1;
+    [u.caseIx].concat(cs.map(function (_, k) { return k; })).forEach(function (k) { if (idx < 0 && toks(exampleLines(cs[k])) === typed) idx = k; });
+    if (idx < 0) {
+      u.result = { info: true, msg: "You ran it with your own input, so I did not compare it with the expected output.", detail: "Press \"Run with example input\" to get it checked." };
+      renderResult(q); return;
+    }
+    u.caseIx = idx;
+    var res = compareOutput(q, r.out, cs[idx].output);
+    u.result = res;
+    if (res.ok) u.passed[idx] = true;
+    renderCases(q); renderResult(q);
+    if (res.ok && Object.keys(u.passed).length === cs.length) { setDone(q, true, true); renderDone(q); }
+  }
+  function renderResult(q) {
+    var el = $("result"); if (!el) return; var r = U(q).result;
+    el.innerHTML = r ? '<div class="result ' + (r.info ? "info" : r.ok ? "ok" : "bad") + '" role="status"><strong>' + esc(r.msg) + "</strong>" + (r.detail ? '<span class="d">' + esc(r.detail).replace(/\n/g, "<br>") + "</span>" : "") + "</div>" : "";
+  }
+  var TIPS = [
+    [/expected ';'/, "A semicolon is missing at the end of the line above the one named here."],
+    [/undeclared/, "This name has not been declared. Check the spelling, or declare it first, for example: int x;"],
+    [/implicit declaration of function/, "C does not know this function. Check the spelling and add the right #include at the top."],
+    [/read-only/, "A const variable cannot be changed after it is set."],
+    [/lvalue required/, "The left side of = must be a single variable, where the answer is stored."],
+    [/invalid suffix/, "A name cannot start with a digit."],
+    [/expected identifier/, "A keyword such as int or float cannot be used as a variable name."],
+    [/expected '}'/, "A { is not closed. Check that every { has a matching }."],
+    [/suggest parentheses around assignment/, "Did you mean == to compare? A single = stores a value."],
+    [/is used uninitialized/, "Give the variable a value before you read it. In a real program it would hold a random leftover value."],
+    [/expects argument of type/, "The placeholder does not match the kind of value. Use %d for int, %f for float and double, %c for char."],
+    [/Write &/, "scanf needs the address of the variable. Put & in front of it."]
+  ];
+  function diagHtml(d, lines, lastFn) {
+    var h = "";
+    if (d.fn && d.fn !== lastFn.v) { h += '<span class="dim">main.c: In function \'' + esc(d.fn) + "':</span>\n"; lastFn.v = d.fn; }
+    var cls = d.level === "error" ? "d-err" : "d-warn";
+    if (!d.line) return h + '<span class="' + cls + '">' + esc(d.msg) + "</span>\n";
+    h += '<span class="' + cls + '">main.c:' + d.line + ":" + d.col + ": " + d.level + ": " + esc(d.msg) + "</span>\n";
+    var text = lines[d.line - 1];
+    if (text !== undefined) {
+      var g = String(d.line); while (g.length < 4) g = " " + g;
+      h += '<span class="src">' + g + " | " + esc(text) + "\n     | " + new Array(Math.max(0, d.col)).join(" ") + "^</span>\n";
+    }
+    for (var i = 0; i < TIPS.length; i++) if (TIPS[i][0].test(d.msg)) { h += '<span class="tip">Tip: ' + esc(TIPS[i][1]) + "</span>\n"; break; }
+    return h;
+  }
+  function renderTerm(q) {
+    var u = U(q), el = $("term"); if (!el) return;
+    var r = u.run, h = "";
+    if (!r) { el.innerHTML = '<span class="dim">Press Run to compile and run your program. The output appears here.</span>'; return; }
+    var lines = (u.src || $("ed").value).split("\n"), errs = r.diags.filter(function (d) { return d.level === "error"; }), warns = r.diags.filter(function (d) { return d.level === "warning"; }), lf = { v: null };
+    if (r.status === "compile_error") {
+      errs.slice(0, 5).forEach(function (d) { h += diagHtml(d, lines, lf); });
+      h += '\n<span class="dim">Compilation failed, so the program did not run. Fix the first error and press Run again.</span>';
+    } else {
+      if (warns.length) { warns.slice(0, 4).forEach(function (d) { h += diagHtml(d, lines, lf); }); h += "\n"; }
+      var out = r.out, last = 0;
+      r.marks.forEach(function (m) { h += esc(out.slice(last, m.at)) + '<span class="typed">' + esc(u.inputs[m.line] || "") + "</span>\n"; last = m.at; });
+      h += esc(out.slice(last));
+      if (r.status === "needinput") h += '<input class="tin" id="tin" autocomplete="off" spellcheck="false" aria-label="Type input for your program, then press Enter">';
+      else {
+        if (out && !/\n$/.test(out)) h += "\n";
+        if (r.status === "runtime_error") h += '<span class="d-err">' + esc(r.error) + "</span>\n";
+        else if (r.status === "timeout") h += '<span class="d-err">Stopped: the program ran for more than 2.5 seconds. Is there a loop that never ends?</span>\n';
+        h += '<span class="dim">[' + (r.status === "ok" ? "Program finished with exit code " + r.exit : "Program stopped") + "]</span>";
+      }
+    }
+    el.innerHTML = h;
+    el.scrollTop = el.scrollHeight;
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.target && e.target.id === "tin" && e.key === "Enter") {
+      var m = /^#q-(\d+)$/.exec(location.hash), q = m && Q[+m[1] - 1]; if (!q) return;
+      e.preventDefault(); var u = U(q); u.inputs.push(e.target.value); execute(q);
+    }
+  });
+
+  function renderCheck(q) {
+    var u = U(q), el = $("check"), h = "", r = u.result;
+    function res(r) { return r ? '<div class="result ' + (r.ok ? "ok" : "bad") + '" role="status"><strong>' + esc(r.msg) + "</strong>" + (r.detail ? '<span class="d">' + esc(r.detail).replace(/\n/g, "<br>") + "</span>" : "") + "</div>" : ""; }
+    if (q.kind === "code") {
+      h = "";
+    } else {
+      h += '<div class="row-actions"><input class="ans" id="ans" type="text" autocomplete="off" spellcheck="false" placeholder="Type what it prints" aria-label="Your answer" value="' + esc(u.answer).replace(/"/g, "&quot;") + '"><button class="btn primary" data-act="checkans">Check</button></div>' + res(r) +
+        (u.revealed ? "" : '<div><button class="link" data-act="reveal">Give up and show the answer</button></div>');
+      if (q.answer.indexOf(" ") > -1 && q.body) h += '<p class="note">If it prints several lines, write them on one line separated by spaces.</p>';
+    }
+    el.innerHTML = h;
+    var a = $("ans"); if (a) { a.addEventListener("input", function () { u.answer = a.value; }); a.addEventListener("keydown", function (e) { if (e.key === "Enter") doCheckAns(q); }); }
+  }
+  function doCheckAns(q) {
+    var u = U(q), a = $("ans"); if (a) u.answer = a.value;
+    var got = normAns(u.answer); if (!got) { u.result = { ok: false, msg: "Type your answer first." }; renderCheck(q); return; }
+    var ok = [q.answer].concat(q.alt || []).map(normAns).indexOf(got) > -1;
+    if (ok) { u.result = { ok: true, msg: "Correct!" }; u.revealed = true; renderCheck(q); renderHelp(q); setDone(q, true, true); renderDone(q); }
+    else { u.result = { ok: false, msg: "Not quite.", detail: "Try again, or open a hint." }; renderCheck(q); }
+  }
+
+  /* ---------- hints and walkthrough ---------- */
+  function renderHelp(q) {
+    var u = U(q), hs = q.hints || [], h = '<div class="helpbox"><h2>Stuck? Take it slowly.</h2>';
+    if (u.hints) h += hs.slice(0, u.hints).map(function (x) { return '<div class="hint"><span class="ic">' + I.bulb + "</span><p>" + fmt(x) + "</p></div>"; }).join("");
+    if (u.hints < hs.length) h += '<div class="row-actions"><button class="btn" data-act="hint">' + I.bulb + (u.hints ? "Another hint" : "Give me a hint") + " (" + (u.hints + 1) + " of " + hs.length + ")</button></div>";
+    if (q.kind === "code") {
+      var steps = q.steps;
+      if (!u.walk) h += '<div class="row-actions"><button class="btn" data-act="walk">Walk me through it</button><span class="note">One step at a time. Stop as soon as it clicks.</span></div>';
+      else {
+        h += '<div class="steps">' + steps.slice(0, u.walk).map(function (s, k) { return '<div class="step"><span class="no">' + (k + 1) + '</span><div class="body">' + codeBlock(trimBlank(s.code), "", false) + "<p>" + fmt(s.say) + "</p></div></div>"; }).join("") + "</div>";
+        if (u.walk < steps.length) h += '<div class="row-actions"><button class="btn primary" data-act="nextstep">Next step (' + (u.walk + 1) + " of " + steps.length + ')</button><button class="btn" data-act="allsteps">Show everything</button></div>';
+        else h += '<h3 style="font-size:19px">The full program</h3>' + codeBlock(steps.map(function (s) { return s.code; }).join("\n") + "\n", "solution.c", true) + '<p class="note">Now close this and try writing it again from scratch.</p>';
+      }
+    } else if (!u.revealed) h += '<div class="row-actions"><button class="btn" data-act="reveal">Show the answer and why</button></div>';
+    else h += '<div class="step"><span class="no">' + I.check.replace("<svg", '<svg width="14" height="14"') + '</span><div class="body"><span class="answer-line">' + esc(q.answer) + '</span><ol class="whylist">' + q.why.map(function (x) { return "<li>" + fmt(x) + "</li>"; }).join("") + "</ol></div></div>";
+    $("help").innerHTML = h + "</div>";
+  }
+
+  /* ---------- colours page ---------- */
+  var SAMPLE = '#include <stdio.h>\n#define LIMIT 100\n\n// swap two numbers\nint main() {\n    int a = 10, b = 20, temp;\n    printf("Before: a=%d b=%d\\n", a, b);\n\n    temp = a;\n    a = b;\n    b = temp;\n    if (a < LIMIT && b >= 0) {\n        printf("After: a=%d b=%d\\n", a, b);\n    }\n    return 0;\n}';
+  function renderTheme() {
+    var c = themeColors(), n = SAMPLE.split("\n").length, nums = "", k;
+    for (k = 1; k <= n; k++) nums += k + "\n";
+    var h = '<nav class="crumb"><a href="#home" data-act="themeback">' + I.left + "Back</a></nav>" +
+      '<span class="eyebrow">Colours</span><h1 style="margin:6px 0 8px">Make the editor yours</h1><p class="lede" style="margin-bottom:22px">Pick a ready-made style, then change any colour you like. Your choice is used in every coding box and is saved for next time.</p>' +
+      '<div class="presets">' + PRESETS.map(function (x) {
+        return '<button class="preset" data-act="preset" data-v="' + x.id + '" aria-pressed="' + (theme.p === x.id) + '"><span class="sw" style="background:' + x.c.bg + '">' + ["kw", "ty", "fn", "str", "num"].map(function (t) { return '<i style="background:' + x.c[t] + '"></i>'; }).join("") + "</span><b>" + x.name + "</b></button>";
+      }).join("") + "</div>" +
+      '<div class="themelayout"><div class="stick"><div class="win" id="pvwin"><div class="bar"><div class="dots"><i></i><i></i><i></i></div><span class="fname">preview.c</span></div><div class="ed"><pre class="gut mono">' + nums + '</pre><pre class="hlp static mono">' + hl(SAMPLE, "e-") + '</pre></div></div>' +
+      '<div class="chips" style="margin-top:14px"><span class="k">Text size</span>' + [["Small", 12.5], ["Medium", 13.5], ["Large", 15.5], ["Extra large", 17.5]].map(function (o) { return '<button class="chip" data-act="fs" data-v="' + o[1] + '" aria-pressed="' + (+theme.fs === o[1]) + '">' + o[0] + "</button>"; }).join("") + "</div></div>" +
+      '<div><div class="tgrid">' + PICKS.map(function (x) { return '<label class="pick"><input type="color" data-ck="' + x[0] + '" value="' + c[x[0]] + '" aria-label="' + x[1] + '"><span>' + x[1] + '<small id="hx-' + x[0] + '">' + c[x[0]] + "</small></span></label>"; }).join("") + '</div><button class="btn" data-act="themereset">Undo my colour changes</button></div></div>';
+    $("main").innerHTML = h;
+  }
+  function setTheme(fn) { fn(); theme.t = Date.now(); save("cpl:theme", theme); applyTheme(); }
+  document.addEventListener("input", function (e) {
+    var k = e.target && e.target.dataset && e.target.dataset.ck; if (!k) return;
+    setTheme(function () { theme.c = theme.c || {}; theme.c[k] = e.target.value; });
+    var hx = $("hx-" + k); if (hx) hx.textContent = e.target.value;
+    var sw = document.querySelectorAll(".preset"); [].forEach.call(sw, function (b) { b.setAttribute("aria-pressed", "false"); });
+  });
+
+  /* ---------- routing ---------- */
+  function route() {
+    var hsh = location.hash, m = /^#q-(\d+)$/.exec(hsh), tm = /^#t-([a-z]+)$/.exec(hsh);
+    $("fx").innerHTML = "";
+    if (m && Q[+m[1] - 1]) renderQuestion(Q[+m[1] - 1]);
+    else if (tm && T[tm[1]]) renderTopic(T[tm[1]]);
+    else if (hsh === "#theme") renderTheme();
+    else renderHome();
+    renderStats(); window.scrollTo(0, 0);
+  }
+  window.addEventListener("hashchange", route);
+
+  function copyText(text, btn) {
+    var orig = btn ? btn.textContent : "";
+    function flash(msg) { if (btn) { btn.textContent = msg; setTimeout(function () { btn.textContent = orig; }, 1400); } }
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} document.body.removeChild(ta); flash(ok ? "Copied" : "Select and copy");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { flash("Copied"); }, fallback); else fallback();
+  }
+  var resetTimer;
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act]"); if (!el) return;
+    var act = el.dataset.act, m = /^#q-(\d+)$/.exec(location.hash), q = m && Q[+m[1] - 1], u = q && U(q), tm = /^#t-([a-z]+)$/.exec(location.hash);
+    switch (act) {
+      case "filter": view[el.dataset.key] = el.dataset.v; if (tm) renderTopic(T[tm[1]]); break;
+      case "clearfilters": view.level = view.kind = "all"; if (tm) renderTopic(T[tm[1]]); break;
+      case "random": var pool = Q.filter(function (x) { return !isDone(x); }); if (!pool.length) pool = Q; location.hash = "#q-" + pool[Math.floor(Math.random() * pool.length)].id; break;
+      case "reset":
+        if (el.dataset.armed) { done = {}; drafts = {}; days = []; ui = {}; last = 0; notes = {}; save("cpl:notes", notes); save("cpl:done", done); save("cpl:drafts", drafts); save("cpl:days", days); save("cpl:last", 0); route(); }
+        else { el.dataset.armed = "1"; el.textContent = "Click again to erase progress and code"; clearTimeout(resetTimer); resetTimer = setTimeout(function () { var b = $("resetbtn"); if (b) { delete b.dataset.armed; b.textContent = "Reset everything"; } }, 3500); }
+        break;
+      case "gotheme": location.hash = "#theme"; break;
+      case "themeback": if (history.length > 1) { e.preventDefault(); history.back(); } break;
+      case "preset": setTheme(function () { theme.p = el.dataset.v; theme.c = {}; }); renderTheme(); break;
+      case "fs": setTheme(function () { theme.fs = +el.dataset.v; }); renderTheme(); break;
+      case "themereset": setTheme(function () { theme.c = {}; }); renderTheme(); break;
+      case "closetoast": $("fx").innerHTML = ""; break;
+      case "copy": copyText(decodeURIComponent(el.dataset.code), el); break;
+      case "copyeditor": copyText($("ed").value, el); break;
+      case "resetcode": drafts[q.key] = { t: Date.now(), v: null }; save("cpl:drafts", drafts); setupEditor(q); break;
+      case "notes": u.notesOpen = !u.notesOpen; renderNotes(q); if (u.notesOpen && $("notetext")) $("notetext").focus(); break;
+      case "run": startRun(q, "normal"); break;
+      case "runex": startRun(q, "example"); break;
+      case "clearterm": u.run = null; u.inputs = []; u.result = null; renderTerm(q); renderResult(q); break;
+      case "case": u.caseIx = +el.dataset.v; renderCases(q); break;
+      case "checkans": doCheckAns(q); break;
+      case "reveal": u.revealed = true; renderCheck(q); renderHelp(q); break;
+      case "hint": u.hints++; renderHelp(q); break;
+      case "walk": u.walk = 1; renderHelp(q); break;
+      case "nextstep": u.walk++; renderHelp(q); break;
+      case "allsteps": u.walk = q.steps.length; renderHelp(q); break;
+      case "toggledone": setDone(q, !isDone(q), !isDone(q)); renderDone(q); break;
+    }
+  });
+
+  route();
+  initCloud();
+})();
+</script>
+
+</body></html>
